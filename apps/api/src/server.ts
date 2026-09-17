@@ -12,6 +12,8 @@ import { seed } from './db/seed.js';
 import { config, hasBazaGaiKey, isProduction } from './lib/env.js';
 import { HttpError } from './lib/errors.js';
 import { agentAdminRoutes, agentPublicRoutes, agentSelfRoutes } from './routes/agents.js';
+import { clientRoutes } from './routes/clients.js';
+import { dealRoutes } from './routes/deals.js';
 import { authRoutes } from './routes/auth.js';
 import { calculationRoutes } from './routes/calculations.js';
 import { adminLeadRoutes, publicLeadRoutes } from './routes/leads.js';
@@ -113,6 +115,8 @@ async function buildServer() {
   await app.register(watchlistRoutes, { prefix: '/api/watchlist' });
   await app.register(agentAdminRoutes, { prefix: '/api/agents' });
   await app.register(agentSelfRoutes, { prefix: '/api/agent' });
+  await app.register(clientRoutes, { prefix: '/api/clients' });
+  await app.register(dealRoutes, { prefix: '/api/deals' });
 
   // Публичная часть для сайта — без авторизации
   await app.register(publicShowcaseRoutes, { prefix: '/api/public/showcase' });
