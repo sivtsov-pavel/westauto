@@ -62,9 +62,13 @@ services:
       - /srv/apps/api/node_modules
     # Общий пакет пересобирается на лету: правка движка расчёта сразу
     # доезжает и до API, и до фронтенда
+    # Сначала собираем общий пакет один раз и только потом стартуем API:
+    # иначе при первом запуске на чистой машине api падает с ERR_MODULE_NOT_FOUND,
+    # потому что dist/ ещё не существует
     command: >
-      sh -c "npm run build:watch -w @avtoklyuch/shared &
-             npm run dev -w @avtoklyuch/api"
+      sh -c "npm run build -w @avtoklyuch/shared &&
+             (npm run build:watch -w @avtoklyuch/shared &
+              npm run dev -w @avtoklyuch/api)"
 
   site:
     build:

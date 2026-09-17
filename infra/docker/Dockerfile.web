@@ -8,6 +8,7 @@ COPY packages/shared/package.json packages/shared/
 COPY apps/api/package.json apps/api/
 COPY apps/app/package.json apps/app/
 COPY apps/site-autokey/package.json apps/site-autokey/
+COPY apps/site-westauto/package.json apps/site-westauto/
 
 RUN npm ci
 
@@ -15,6 +16,7 @@ COPY . .
 
 RUN npm run build -w @avtoklyuch/shared \
  && npm run build -w @avtoklyuch/site-autokey \
+ && npm run build -w @avtoklyuch/site-westauto \
  && npm run build -w @avtoklyuch/app
 
 # ─── Сервер сайта: отрисовка страниц витрины ─────────────────────────────────
@@ -36,6 +38,26 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:4173/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 CMD ["node", "apps/site-autokey/dist-ssr/server.js"]
+
+# ─── Сервер сайта WestAuto ───────────────────────────────────────────────────
+#
+# Тот же приём, что у АвтоКлюча: страницы собираются на запрос. Сюда же
+# приходят сайты агентов — они отличаются только именем поддомена в запросе.
+FROM node:20-bookworm-slim AS site-westauto
+
+WORKDIR /srv
+ENV NODE_ENV=production
+
+COPY --from=build /srv/apps/site-westauto/dist apps/site-westauto/dist
+COPY --from=build /srv/apps/site-westauto/dist-ssr apps/site-westauto/dist-ssr
+
+USER node
+EXPOSE 4174
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:4174/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+CMD ["node", "apps/site-westauto/dist-ssr/server.js"]
 
 # ─── Раздача: nginx перед сервером сайта ─────────────────────────────────────
 FROM nginx:1.27-alpine AS runtime

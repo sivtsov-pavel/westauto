@@ -65,13 +65,25 @@ services:
       SITE_PORT: 4173
       API_URL: http://api:3000
 
+  westauto:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.web
+      target: site-westauto
+    restart: always
+    depends_on: [api]
+    environment:
+      NODE_ENV: production
+      SITE_PORT: 4174
+      API_URL: http://api:3000
+
   web:
     build:
       context: .
       dockerfile: infra/docker/Dockerfile.web
       target: runtime
     restart: always
-    depends_on: [api, site]
+    depends_on: [api, site, westauto]
     ports:
       - '${HTTP_PORT}:80'
 
