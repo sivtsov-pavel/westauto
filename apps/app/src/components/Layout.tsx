@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/state/auth';
 import { can, ROLE_LABELS, type Permissions, type Role } from '@avtoklyuch/shared';
-import { BookIcon, CalcIcon, CarIcon, ClockIcon, EyeIcon, GearIcon, KeyMark, ListIcon, UsersIcon, WalletIcon } from './Icons';
+import { BookIcon, CalcIcon, CarIcon, ChartIcon, ClockIcon, EyeIcon, GearIcon, KeyMark, ListIcon, UsersIcon, WalletIcon } from './Icons';
 import { InstallButton } from './InstallButton';
 
 /**
@@ -19,7 +19,8 @@ const NAV: {
   needs?: keyof Permissions;
   roles?: Role[];
 }[] = [
-  { to: '/', label: 'Расчёт', icon: CalcIcon, end: true },
+  { to: '/', label: 'Сводка', icon: ChartIcon, end: true },
+  { to: '/calc', label: 'Расчёт', icon: CalcIcon },
   { to: '/cabinet', label: 'Мой кабинет', icon: WalletIcon, roles: ['agent'] },
   { to: '/history', label: 'История', icon: ClockIcon },
   { to: '/leads', label: 'Заявки', icon: UsersIcon },

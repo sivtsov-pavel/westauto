@@ -7,6 +7,7 @@ import { AgentDashboard } from '@/pages/AgentDashboard';
 import { Agents } from '@/pages/Agents';
 import { Calculator } from '@/pages/Calculator';
 import { Clients } from '@/pages/Clients';
+import { Dashboard } from '@/pages/Dashboard';
 import { Deals } from '@/pages/Deals';
 import { Docs } from '@/pages/Docs';
 import { History } from '@/pages/History';
@@ -73,8 +74,11 @@ function AuthenticatedApp() {
       <Sidebar />
       <main className="main">
         <Routes>
+          {/* Сводка на главной: открыв систему, человек первым делом видит
+              деньги и движение машин, а не пустую форму расчёта */}
+          <Route path="/" element={<Dashboard />} />
           <Route
-            path="/"
+            path="/calc"
             element={<Calculator bootstrap={bootstrap} onBootstrapReload={() => void load()} />}
           />
           <Route path="/history" element={<History />} />

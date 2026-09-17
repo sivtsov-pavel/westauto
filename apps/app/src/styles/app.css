@@ -1616,3 +1616,192 @@ select:disabled {
   .deal-figures { grid-template-columns: 1fr; }
   .stage-name { display: none; }
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Сводка на главной.
+   Плитки разной ширины: деньги и месяцы занимают два столбца — на них
+   смотрят дольше всего, и мельчить их значит заставлять вглядываться.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.dash {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.dash-money { grid-column: span 2; }
+.dash-wide { grid-column: span 2; }
+
+.dash-money-figures {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.dash-bar {
+  height: 6px;
+  background: var(--surface-3);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.dash-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--teal);
+  border-radius: var(--radius-pill);
+}
+
+.dash-bar-thin { height: 4px; margin: 4px 0 0; }
+
+.dash-articles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 16px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* Воронка: имя этапа, полоса, число и сумма — четыре колонки,
+   выровненные по всем строкам, иначе взгляд скачет */
+.funnel-row {
+  display: grid;
+  grid-template-columns: 96px 1fr 26px auto;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.funnel-name {
+  font-size: 11.5px;
+  color: var(--text-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.funnel-track {
+  height: 8px;
+  background: var(--surface-3);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.funnel-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width 0.3s ease;
+}
+
+.funnel-count { font-size: 11.5px; text-align: right; }
+.funnel-money { font-size: 10.5px; min-width: 52px; text-align: right; }
+
+.dash-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: none;
+  border: none;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* ─── Столбики по месяцам ─── */
+
+.months-chart {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 6px;
+  align-items: end;
+  height: 150px;
+}
+
+.month-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.month-value {
+  font: 600 10.5px/1 var(--mono);
+  color: var(--text-soft);
+  height: 12px;
+}
+
+/* Столбик собирается снизу вверх: новые, поверх них вернувшиеся.
+   Поступления идут отдельной бледной полосой позади — деньги приходят
+   позже клиентов, и совмещать их в одну шкалу было бы обманом */
+.month-stack {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.month-bar {
+  display: block;
+  width: 100%;
+  border-radius: 3px;
+  min-height: 0;
+  transition: height 0.3s ease;
+}
+
+.month-new { background: var(--accent); }
+.month-returning { background: var(--teal); }
+
+.month-cash {
+  position: absolute;
+  inset: auto 0 0 0;
+  background: var(--surface-3);
+  border-radius: 3px;
+  z-index: -1;
+}
+
+.month-label {
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+.legend { display: inline-flex; align-items: center; gap: 5px; color: var(--text-soft); }
+.legend > i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.car-chip {
+  font-size: 11.5px;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+@media (max-width: 1100px) {
+  .dash { grid-template-columns: 1fr 1fr; }
+  .dash-money, .dash-wide { grid-column: span 2; }
+}
+
+@media (max-width: 760px) {
+  .dash { grid-template-columns: 1fr; }
+  .dash-money, .dash-wide { grid-column: span 1; }
+  .dash-money-figures, .dash-articles { grid-template-columns: 1fr; }
+}

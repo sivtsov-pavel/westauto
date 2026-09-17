@@ -250,3 +250,17 @@ export function WalletIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Столбики — значок сводки: три полосы разной высоты, как на графике. */
+export function ChartIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path
+        d="M5 20V11M12 20V4M19 20v-6"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </Icon>
+  );
+}
