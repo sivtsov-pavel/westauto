@@ -14,9 +14,19 @@ const FILTERS: { value: ShowcaseStatus | 'all'; key: DictKey }[] = [
   { value: 'delivered_case', key: 'cars.delivered' },
 ];
 
+/*
+ * Сколько карточек показываем сразу.
+ *
+ * Восемь — это два полных ряда на широком экране и ровный низ страницы.
+ * Остальные подгружаются кнопкой: вываливать сразу полсотни авто значит
+ * заставить человека прокручивать то, что он не просил.
+ */
+const PAGE_SIZE = 8;
+
 export function Cars() {
   const { t } = useI18n();
   const [filter, setFilter] = useState<ShowcaseStatus | 'all'>('all');
+  const [shown, setShown] = useState(PAGE_SIZE);
 
   useDocumentTitle(`${t('cars.title')} — WestAuto`);
 
@@ -26,7 +36,9 @@ export function Cars() {
 
   const all = data?.items ?? [];
   // Фильтруем на месте: переключение категорий не должно ждать сеть
-  const cars = filter === 'all' ? all : all.filter((car) => car.status === filter);
+  const matching = filter === 'all' ? all : all.filter((car) => car.status === filter);
+  const cars = matching.slice(0, shown);
+  const rest = matching.length - cars.length;
 
   return (
     <>
@@ -45,7 +57,11 @@ export function Cars() {
                 type="button"
                 className={`btn btn-sm ${filter === item.value ? 'btn-navy' : 'btn-outline'}`}
                 aria-pressed={filter === item.value}
-                onClick={() => setFilter(item.value)}
+                onClick={() => {
+                  setFilter(item.value);
+                  // Новая категория — снова с первой порции
+                  setShown(PAGE_SIZE);
+                }}
               >
                 {t(item.key)}
               </button>
@@ -66,9 +82,27 @@ export function Cars() {
           )}
 
           {cars.length > 0 && (
-            <div className="cars">
-              {cars.map((car) => <CarCard key={car.id} car={car} />)}
-            </div>
+            <>
+              <div className="cars">
+                {cars.map((car) => <CarCard key={car.id} car={car} />)}
+              </div>
+
+              {rest > 0 && (
+                <div className="cars-more">
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-lg"
+                    onClick={() => setShown((n) => n + PAGE_SIZE)}
+                  >
+                    {t('cars.more')}
+                    <span className="cars-more-count">+{Math.min(rest, PAGE_SIZE)}</span>
+                  </button>
+                  <span className="muted" style={{ fontSize: 13.5 }}>
+                    {t('cars.shown')} {cars.length} {t('cars.of')} {matching.length}
+                  </span>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>

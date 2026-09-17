@@ -143,6 +143,9 @@ export const dict = {
   'cars.atAuction':      { uk: 'Зараз на торгах',  ru: 'Сейчас на торгах',  en: 'At auction now' },
   'cars.delivered':      { uk: 'Привезено — приклад', ru: 'Привезено — пример', en: 'Delivered — case study' },
   'cars.want':           { uk: 'Хочу це авто',     ru: 'Хочу это авто',     en: 'I want this car' },
+  'cars.more':           { uk: 'Показати ще',      ru: 'Показать ещё',      en: 'Show more' },
+  'cars.shown':          { uk: 'Показано',         ru: 'Показано',          en: 'Showing' },
+  'cars.of':             { uk: 'з',                ru: 'из',                en: 'of' },
   'cars.back':           { uk: 'Усі авто',         ru: 'Все авто',          en: 'All cars' },
   'cars.gone': {
     uk: 'Цього авто вже немає у вітрині — можливо, його купили.',
