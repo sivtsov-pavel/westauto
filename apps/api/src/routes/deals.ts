@@ -34,7 +34,10 @@ const dealBody = z.object({
   managerId: z.string().uuid().nullish(),
   stage: z.enum(STAGES).default('lead'),
   outcome: z.enum(['active', 'won', 'lost']).default('active'),
-  platform: z.enum(['copart', 'iaai', 'manheim']).nullish(),
+  // Значения совпадают с типом platform в базе: шесть площадок
+  platform: z
+    .enum(['copart', 'iaai', 'manheim', 'copart_uk', 'copart_ca', 'iaai_ca'])
+    .nullish(),
   lotNumber: z.string().max(60).nullish(),
   vin: z.string().max(40).nullish(),
   makeModel: z.string().max(160).nullish(),

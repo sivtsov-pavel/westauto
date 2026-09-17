@@ -115,6 +115,65 @@ export async function adminLeadRoutes(app: FastifyInstance): Promise<void> {
     };
   });
 
+  /**
+   * Заявка → клиент.
+   *
+   * Человек, оставивший заявку, уже мог обращаться раньше — тогда заводить
+   * его заново нельзя: развалится история сделок и счёт вернувшихся. Ищем по
+   * телефону (по последним девяти цифрам, как везде) и либо подхватываем
+   * существующего, либо заводим нового. Повторный вызов ничего не портит.
+   */
+  app.post('/:id/client', async (request) => {
+    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const user = request.user!;
+
+    const lead = await queryOne<Record<string, unknown>>(
+      `SELECT * FROM leads
+        WHERE id = $1 AND ($2::uuid IS NULL OR agent_id = $2::uuid)`,
+      [id, user.role === 'agent' ? user.id : null],
+    );
+    if (!lead) throw notFound('Заявка не найдена');
+
+    if (lead['client_id']) {
+      return { item: { id: lead['client_id'] as string, existing: true } };
+    }
+
+    const phone = (lead['phone'] as string) ?? '';
+    const key = phone.replace(/\D/g, '').slice(-9);
+
+    const found = key
+      ? await queryOne<{ id: string }>(
+          `SELECT id FROM clients
+            WHERE right(regexp_replace(phone, '\\D', '', 'g'), 9) = $1`,
+          [key],
+        )
+      : null;
+
+    const clientId = found
+      ? found.id
+      : (
+          await queryOne<{ id: string }>(
+            `INSERT INTO clients (full_name, phone, source, agent_id, manager_id, notes)
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+            [
+              lead['name'] as string,
+              phone,
+              (lead['source'] as string) ?? 'site',
+              lead['agent_id'] ?? null,
+              user.role === 'agent' ? null : user.id,
+              lead['comment'] ?? null,
+            ],
+          )
+        )!.id;
+
+    await query('UPDATE leads SET client_id = $1, is_processed = true WHERE id = $2', [
+      clientId,
+      id,
+    ]);
+
+    return { item: { id: clientId, existing: Boolean(found) } };
+  });
+
   app.patch('/:id', async (request) => {
     const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
     const body = z.object({ isProcessed: z.boolean() }).parse(request.body);

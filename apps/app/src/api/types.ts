@@ -154,3 +154,129 @@ export interface LeadRow {
   isProcessed: boolean;
   createdAt: string;
 }
+
+// ─── Клиенты и сделки ───────────────────────────────────────────────────────
+
+/** Этапы сделки — от заявки до выдачи авто. */
+export type DealStage =
+  | 'lead'
+  | 'quoted'
+  | 'bidding'
+  | 'purchased'
+  | 'shipping'
+  | 'port'
+  | 'customs'
+  | 'delivered';
+
+export type DealOutcome = 'active' | 'won' | 'lost';
+
+/** Четыре статьи расходов, по которым клиент платит. */
+export type DealArticle = 'lot' | 'delivery' | 'customs' | 'parking';
+
+export type Currency = 'USD' | 'UAH' | 'EUR';
+
+export type { Platform } from '@avtoklyuch/shared';
+
+export interface ClientRow {
+  id: string;
+  fullName: string;
+  phone: string;
+  telegram: string | null;
+  viber: string | null;
+  whatsapp: string | null;
+  email: string | null;
+  city: string | null;
+  source: string;
+  agentId: string | null;
+  agentName: string | null;
+  managerId: string | null;
+  notes: string | null;
+  dealsCount: number;
+  lastDealAt: string | null;
+  createdAt: string;
+}
+
+export interface DealRow {
+  id: string;
+  clientId: string;
+  clientName: string | null;
+  clientPhone: string | null;
+  leadId: string | null;
+  calculationId: string | null;
+  agentId: string | null;
+  agentName: string | null;
+  managerId: string | null;
+  stage: DealStage;
+  outcome: DealOutcome;
+  platform: Platform | null;
+  lotNumber: string | null;
+  vin: string | null;
+  makeModel: string | null;
+  year: number | null;
+  location: string | null;
+  purchasePriceUsd: number | null;
+  portEta: string | null;
+  portArrivedAt: string | null;
+  deliveredAt: string | null;
+  notes: string | null;
+  /** Итоги в долларах: гривневые суммы уже пересчитаны на стороне базы */
+  plannedUsd: number;
+  paidUsd: number;
+  photosCount: number;
+  commentsCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DealCharge {
+  id: string;
+  article: DealArticle;
+  planned: number;
+  currency: Currency;
+  comment: string | null;
+}
+
+export interface DealPayment {
+  id: string;
+  article: DealArticle;
+  amount: number;
+  currency: Currency;
+  paidAt: string | null;
+  fxRate: number | null;
+  method: string | null;
+  comment: string | null;
+  authorName: string | null;
+}
+
+export interface DealPhoto {
+  id: string;
+  kind: 'auction' | 'port' | 'other';
+  url: string | null;
+  filePath: string | null;
+  caption: string | null;
+  createdAt: string;
+}
+
+export interface DealComment {
+  id: string;
+  body: string;
+  authorName: string | null;
+  createdAt: string;
+}
+
+export interface DealStageEvent {
+  id: string;
+  fromStage: DealStage | null;
+  toStage: DealStage;
+  authorName: string | null;
+  createdAt: string;
+}
+
+export interface DealDetails {
+  item: DealRow;
+  charges: DealCharge[];
+  payments: DealPayment[];
+  photos: DealPhoto[];
+  comments: DealComment[];
+  history: DealStageEvent[];
+}

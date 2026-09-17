@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiError } from '@/api/client';
-import type { LeadRow } from '@/api/types';
+import type { ClientRow, LeadRow } from '@/api/types';
+import { Modal } from '@/components/Modal';
+import { DealForm } from './deals/DealForm';
 import { CheckIcon } from '@/components/Icons';
 import { useAuth } from '@/state/auth';
 import { useToast } from '@/state/toast';
@@ -17,6 +19,30 @@ export function Leads() {
   const { user } = useAuth();
   const [items, setItems] = useState<LeadRow[]>([]);
   const [loading, setLoading] = useState(true);
+  // Заявка, которую превращаем в сделку: клиент из неё уже создан
+  const [dealFor, setDealFor] = useState<{ leadId: string; clientId: string } | null>(null);
+  const [clients, setClients] = useState<ClientRow[]>([]);
+
+  /**
+   * Заявка → клиент → сделка, в один клик.
+   *
+   * Перепечатывать имя и телефон руками — это лишняя работа и опечатки. Если
+   * человек уже обращался, сервер подхватит существующего клиента, а не
+   * заведёт второго с тем же номером.
+   */
+  async function toDeal(leadId: string) {
+    try {
+      const res = await api.post<{ item: { id: string; existing: boolean } }>(
+        `/api/leads/${leadId}/client`,
+      );
+      if (res.item.existing) toast.success('Клиент уже был в базе — открываю его сделку');
+      const list = await api.get<{ items: ClientRow[] }>('/api/clients');
+      setClients(list.items);
+      setDealFor({ leadId, clientId: res.item.id });
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : 'Не удалось завести сделку');
+    }
+  }
 
   const load = useCallback(async () => {
     try {
@@ -103,6 +129,14 @@ export function Leads() {
                           <CheckIcon size={12} />
                         </button>
                       )}
+                      <button
+                        type="button"
+                        className="btn btn-ghost"
+                        style={{ marginLeft: 6 }}
+                        onClick={() => void toDeal(lead.id)}
+                      >
+                        В сделку
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -119,6 +153,22 @@ export function Leads() {
           )}
         </section>
       </div>
+
+      {dealFor && (
+        <Modal title="Сделка из заявки" onClose={() => setDealFor(null)}>
+          <DealForm
+            clients={clients}
+            canPickAgent={!isAgent}
+            presetClientId={dealFor.clientId}
+            onDone={() => {
+              setDealFor(null);
+              void load();
+              toast.success('Сделка заведена — она в разделе «Сделки»');
+            }}
+            onCancel={() => setDealFor(null)}
+          />
+        </Modal>
+      )}
     </>
   );
 }

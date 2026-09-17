@@ -6,6 +6,8 @@ import { Sidebar } from '@/components/Layout';
 import { AgentDashboard } from '@/pages/AgentDashboard';
 import { Agents } from '@/pages/Agents';
 import { Calculator } from '@/pages/Calculator';
+import { Clients } from '@/pages/Clients';
+import { Deals } from '@/pages/Deals';
 import { Docs } from '@/pages/Docs';
 import { History } from '@/pages/History';
 import { Login } from '@/pages/Login';
@@ -79,6 +81,8 @@ function AuthenticatedApp() {
           <Route path="/cabinet" element={<AgentDashboard />} />
           <Route path="/agents" element={<Agents />} />
           <Route path="/leads" element={<Leads />} />
+          <Route path="/clients" element={<Clients />} />
+          <Route path="/deals" element={<Deals />} />
           <Route path="/watchlist" element={<Watchlist />} />
           <Route path="/showcase" element={<Showcase />} />
           <Route path="/tariffs" element={<Tariffs />} />
