@@ -10,10 +10,19 @@ interface ModalProps {
 export function Modal({ title, onClose, children, footer }: ModalProps) {
   const ref = useRef<HTMLDivElement>(null);
 
+  // Обработчик закрытия держим в ссылке, а не в зависимостях эффекта.
+  // Родители передают его стрелкой — onClose={() => setDraft(null)}, — то есть
+  // на каждом рендере это новая функция. С ней в зависимостях эффект
+  // перезапускался после каждого нажатия клавиши: его уборка возвращала фокус
+  // туда, откуда окно открыли, а новый заход уводил его в первое поле формы.
+  // Со стороны это выглядело так, будто поле принимает по одному символу.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
     // Esc закрывает, фокус уезжает внутрь окна — иначе Tab уводит на фон
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') onCloseRef.current();
     };
     document.addEventListener('keydown', onKey);
 
@@ -24,7 +33,8 @@ export function Modal({ title, onClose, children, footer }: ModalProps) {
       document.removeEventListener('keydown', onKey);
       previous?.focus();
     };
-  }, [onClose]);
+    // Только при открытии и закрытии окна: список намеренно пуст
+  }, []);
 
   return (
     <div
