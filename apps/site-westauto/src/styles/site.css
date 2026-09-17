@@ -1281,8 +1281,10 @@ p { margin: 0; }
   display: flex;
   align-items: center;
   gap: 14px;
-  max-width: min(460px, calc(100vw - 40px));
-  padding: 14px 16px;
+  /* Ширины должно хватать, чтобы подпись легла в одну-две строки,
+     а не в узкий столбик рядом с кнопкой */
+  width: min(540px, calc(100vw - 40px));
+  padding: 16px 18px;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -1297,7 +1299,19 @@ p { margin: 0; }
 
 .install-banner img { border-radius: 10px; flex: none; }
 
-.install-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.install-banner .stack { flex: 1 1 auto; }
+
+.install-banner .stack > span {
+  /* Подпись не должна тянуть карточку вверх переносами */
+  line-height: 1.45;
+}
+
+.install-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
 
 .install-close {
   display: flex;
@@ -1319,7 +1333,12 @@ p { margin: 0; }
   .install-banner {
     left: 16px;
     right: 16px;
-    max-width: none;
+    width: auto;
+    flex-wrap: wrap;
     bottom: calc(84px + env(safe-area-inset-bottom, 0px));
   }
+
+  /* Кнопка йде під текст на всю ширину — так у неї нормальна зона дотику */
+  .install-actions { width: 100%; margin-top: 4px; }
+  .install-actions .btn { flex: 1 1 auto; }
 }
