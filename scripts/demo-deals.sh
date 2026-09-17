@@ -20,11 +20,23 @@ MODE="${1:-preview}"
 PORT=$(grep -E '^HTTP_PORT=' .env | cut -d= -f2 | tr -d '[:space:]')
 BASE="http://127.0.0.1:${PORT:-8081}"
 
-# Боевой стенд себя выдаёт NODE_ENV — на нём учебные данные не заводим
+# На бою учебные данные появляться сами не должны: через месяц их не отличить
+# от настоящих — они попадут в отчёты, в графики и в суммы долгов. Поэтому
+# нужен явный флаг, а каждая учебная запись получает метку в заметках.
+COMPOSE_FILE="docker-compose.yml"
+IS_PROD=no
 if grep -qE '^NODE_ENV=production' .env; then
-  echo "Это боевая настройка (NODE_ENV=production). Учебные данные сюда не пишем."
-  exit 1
+  IS_PROD=yes
+  COMPOSE_FILE="docker-compose.prod.yml"
+  if [[ "${DEMO_ON_PROD:-}" != "yes" ]]; then
+    echo "Это боевая настройка (NODE_ENV=production)."
+    echo "Учебные данные сюда пишутся только осознанно:"
+    echo "  DEMO_ON_PROD=yes $0 apply     — добавить"
+    echo "  DEMO_ON_PROD=yes $0 remove    — убрать перед реальным запуском"
+    exit 1
+  fi
 fi
+export COMPOSE_FILE
 
 LOGIN=$(grep -E '^BOOTSTRAP_ADMIN_LOGIN=' .env | cut -d= -f2)
 PASS=$(grep -E '^BOOTSTRAP_ADMIN_PASSWORD=' .env | cut -d= -f2)
@@ -118,6 +130,10 @@ import json, pathlib, subprocess, sys, os
 from datetime import date, timedelta
 
 mode, base, jar = sys.argv[1], sys.argv[2], sys.argv[3]
+
+# Метка учебной записи. По ней их видно в карточке и можно найти в базе,
+# если скрипта под рукой не окажется.
+DEMO_MARK = 'УЧЕБНЫЕ ДАННЫЕ — удалить перед реальным запуском'
 payload = json.loads(os.environ['PAYLOAD'])
 
 def call(method, path, body=None):
@@ -172,6 +188,7 @@ for entry in payload:
     if found:
         client_id = found['id']
     else:
+        c = dict(c, notes=DEMO_MARK)
         res = call('POST', '/api/clients', c)
         if 'item' not in res:
             print('Клиент не создан:', res); continue
@@ -191,6 +208,7 @@ for entry in payload:
             'year': deal['year'],
             'location': deal['location'],
             'purchasePriceUsd': deal['price'] or None,
+            'notes': DEMO_MARK,
         }
         if deal.get('portEta'):
             body['portEta'] = day(deal['portEta'])
@@ -239,7 +257,8 @@ for entry in payload:
 
 pathlib.Path('/tmp/demo-dates.sql').write_text('\n'.join(sql))
 subprocess.run(
-    'docker compose exec -T db psql -U avtoklyuch -d avtoklyuch -q -f - < /tmp/demo-dates.sql',
+    'docker compose -f %s exec -T db psql -U avtoklyuch -d avtoklyuch -q -f - < /tmp/demo-dates.sql'
+    % os.environ.get('COMPOSE_FILE', 'docker-compose.yml'),
     shell=True, capture_output=True, text=True,
 )
 os.unlink('/tmp/demo-dates.sql')
