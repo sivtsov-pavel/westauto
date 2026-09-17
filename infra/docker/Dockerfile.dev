@@ -28,6 +28,10 @@ RUN mkdir -p /srv/.cache/vite-app /srv/.cache/vite-site \
 # Контейнер пишет в примонтированный репозиторий (dist общего пакета,
 # кеш Vite). От root он оставлял бы там файлы, которые хост не может
 # перезаписать, поэтому работаем под node — это ровно uid 1000.
+# Каталог загрузок: пустой named volume наследует права из образа,
+# иначе docker создаёт его от root и процесс под node писать не может
+RUN mkdir -p /data/uploads && chown -R node:node /data
+
 RUN chown -R node:node /srv
 USER node
 
