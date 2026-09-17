@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import { CallFab } from '@/components/CallFab';
+import { InstallBanner } from '@/components/InstallBanner';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { Article } from '@/pages/Article';
@@ -41,6 +42,7 @@ export function App() {
       </main>
       <Footer />
       <CallFab />
+      <InstallBanner />
     </>
   );
 }
