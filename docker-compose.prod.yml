@@ -84,9 +84,20 @@ services:
       target: runtime
     restart: always
     depends_on: [api, site, westauto]
+    # Имя контейнера фиксируем: на сервере к нему по имени ходит общий
+    # ecosystem_router, который состоит сразу в нескольких сетях — служебное
+    # имя «web» там было бы неоднозначным
+    container_name: westauto_web
+    # Наружу порт не выставляем: снаружи в сайты пускает роутер. На хосте
+    # порт открыт только для локальной проверки — 8088 из реестра портов.
     ports:
-      - '${HTTP_PORT}:80'
+      - '127.0.0.1:${HTTP_PORT}:80'
 
 volumes:
   pgdata:
   uploads:
+
+# Сеть с внятным именем: её подключает к себе ecosystem_router
+networks:
+  default:
+    name: westauto-net
