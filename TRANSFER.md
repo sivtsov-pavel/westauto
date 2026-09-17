@@ -15,9 +15,9 @@
 
 | Адрес | Что там |
 |---|---|
-| `local.westauto.seoshkin.tools:8081` | Сайт WestAuto |
-| `local.autokey.seoshkin.tools:8081` | Сайт АвтоКлюч |
-| `ivan.westauto.seoshkin.tools:8081` | Сайт агента (тот же WestAuto + его карточка) |
+| `local.westauto.seoshkin.tools:8088` | Сайт WestAuto |
+| `local.autokey.seoshkin.tools:8088` | Сайт АвтоКлюч |
+| `ivan.westauto.seoshkin.tools:8088` | Сайт агента (тот же WestAuto + его карточка) |
 | любой из них + `/app` | Общая CRM |
 
 На сервере те же имена без `local.` и без порта.
@@ -54,7 +54,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Открывается на `http://localhost:8081`. Для красивых адресов — в `/etc/hosts`:
+Открывается на `http://localhost:8088`. Для красивых адресов — в `/etc/hosts`:
 
 ```
 127.0.0.1 local.westauto.seoshkin.tools
