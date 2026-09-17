@@ -29,7 +29,7 @@ export function Footer() {
         <div className="footer-cols">
           <div className="footer-col">
             <div className="footer-logo">
-              <img src={BRAND.logoLight} alt={BRAND.name} width={46} height={46} />
+              <img src={BRAND.logoLight} alt={BRAND.name} width={90} height={60} />
             </div>
             <p style={{ maxWidth: 300 }}>{t('footer.about')}</p>
             <div className="footer-socials">

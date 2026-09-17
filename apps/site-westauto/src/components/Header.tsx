@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { LOCALES, LOCALE_LABELS, localeFromPath, pathForLocale } from '@avtoklyuch/shared';
 import { BRAND } from '@/content/brand';
 import { useI18n } from '@/i18n';
-import { CloseIcon, MenuIcon } from './Icons';
+import { CloseIcon, LockIcon, MenuIcon } from './Icons';
 
 const NAV = [
   { path: '/', key: 'nav.home' },
@@ -76,6 +76,16 @@ export function Header() {
               </a>
             ))}
           </div>
+
+          {/*
+            Вход в систему для своих. Намеренно тихий: посетителю сайта он
+            не нужен, а менеджер и агент заходят каждый день и не должны
+            искать его в подвале.
+          */}
+          <a className="staff-link" href="/app/" title={t('portal.cabinet')}>
+            <LockIcon />
+            <span>{t('portal.short')}</span>
+          </a>
 
           <a className="btn btn-red btn-sm" href={`${href('/')}#calculator`.replace('//#', '/#')}>
             {t('nav.calc')}

@@ -260,6 +260,7 @@ export const dict = {
   // ── Вход в систему ────────────────────────────────────────────────────────
   'portal.title':    { uk: 'Вхід у систему', ru: 'Вход в систему', en: 'System access' },
   'portal.cabinet':  { uk: 'Особистий кабінет', ru: 'Личный кабинет', en: 'Manager portal' },
+  'portal.short':    { uk: 'Кабінет',      ru: 'Кабинет',      en: 'Sign in' },
   'portal.admin':    { uk: 'Адмінпанель',  ru: 'Админпанель',  en: 'Admin panel' },
   'portal.calc':     { uk: 'Калькулятор',  ru: 'Калькулятор',  en: 'Calculator' },
   'portal.note': {

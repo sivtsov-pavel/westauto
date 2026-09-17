@@ -1210,3 +1210,35 @@ p { margin: 0; }
 
 /* Перемикач мов усередині відкритого меню — для найвужчих екранів */
 .lang-inline { display: none; padding: 14px 0 4px; }
+
+/* ─── Вхід для співробітників у шапці ──────────────────────────────────── */
+
+/*
+  Свідомо тихий елемент: відвідувачу сайту він не потрібен, а менеджер
+  і агент заходять щодня і не мають шукати вхід у підвалі.
+*/
+.staff-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  padding: 11px 15px;
+  border-radius: 9px;
+  border: 1px solid var(--line-strong);
+  white-space: nowrap;
+  min-height: 44px;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+
+.staff-link:hover { color: var(--navy); border-color: var(--navy); }
+
+/* Логотип у підвалі: на темному тлі дрібний знак просто зникає */
+.footer-logo img { height: 56px; width: auto; }
+
+@media (max-width: 860px) {
+  /* Лишаємо тільки замок — підпис не влазить */
+  .staff-link span { display: none; }
+  .staff-link { padding: 11px 13px; }
+}
