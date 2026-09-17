@@ -1,0 +1,59 @@
+{
+  "brand": {
+    "name": "АвтоКлюч",
+    "note": "Placeholder brand name tying the visual identity to the 'под ключ' (turnkey) concept — swap for the real client brand if different.",
+    "logoMark": "Minimal stroke key icon (circle bow + right-angle shaft), always drawn in the accent color."
+  },
+  "fonts": {
+    "googleFontsLink": "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap",
+    "display": { "family": "'Instrument Serif', Georgia, serif", "use": "H1/H2 headlines, big stat numbers, italic for the 'Ключ' half of the wordmark" },
+    "body": { "family": "'Hanken Grotesk', system-ui, sans-serif", "use": "all UI text, body copy, buttons, labels" },
+    "mono": { "family": "'JetBrains Mono', ui-monospace, monospace", "use": "VIN/lot numbers, all currency and numeric values, badges" }
+  },
+  "colorsSite": {
+    "paper": "#F4EFE6",
+    "card": "#FBF8F2",
+    "ink": "#1B1D1F",
+    "inkSoft": "#746C5F",
+    "line": "#E2D9C6",
+    "accent": "#B8863E",
+    "accentDeep": "#8C6A34",
+    "teal": "#2F5C56",
+    "tealBg": "#E7EEEA"
+  },
+  "colorsApp": {
+    "ink": "#15181C",
+    "surface": "#1D2126",
+    "surface2": "#23282E",
+    "surface3": "#2A303A",
+    "border": "#323844",
+    "text": "#F1EDE4",
+    "textSoft": "#98938A",
+    "textFaint": "#6B655A",
+    "accent": "#C49A52",
+    "teal": "#4F8F86",
+    "tealBg": "rgba(79,143,134,0.14)",
+    "violet": "#7E7BAE"
+  },
+  "accentOptions": ["#B8863E", "#A97A34", "#C49A52", "#8C6A34", "#D9AE6B"],
+  "radii": { "sm": "6-8px", "md": "9-10px", "lg": "12-14px", "pill": "999px" },
+  "spacing": {
+    "siteSectionGutterX": "96px",
+    "cardPadding": "22-26px",
+    "rowGap": "8-14px"
+  },
+  "compositionBarPalette": {
+    "note": "Illustrative segmented bar showing what the turnkey total is made of.",
+    "bid": "#7C848F",
+    "deliveryAndFees": "#4F8F86",
+    "customs": "#C49A52",
+    "services": "#7E7BAE"
+  },
+  "usageNotes": [
+    "Site = light/warm theme (paper background). App = dark graphite theme. Same accent family bridges both.",
+    "Accent is used sparingly: primary CTAs, key numbers/totals, logo mark, active nav state, selected/optional-field indicators — never as a background wash.",
+    "Avoid left-border-accent cards and gradient washes; use plain 1px borders + generous whitespace instead.",
+    "The 'client shareable card' component always renders on the light/paper palette even inside the dark app, so a screenshot looks clean regardless of the app's theme.",
+    "Numbers, VINs, lot numbers and all money values are set in the mono font for scanability."
+  ]
+}

@@ -1,0 +1,48 @@
+# ─── Сборка ──────────────────────────────────────────────────────────────────
+FROM node:20-bookworm-slim AS build
+
+WORKDIR /srv
+
+COPY package.json package-lock.json ./
+COPY packages/shared/package.json packages/shared/
+COPY apps/api/package.json apps/api/
+COPY apps/app/package.json apps/app/
+COPY apps/site-autokey/package.json apps/site-autokey/
+
+RUN npm ci
+
+COPY packages/shared packages/shared
+COPY apps/api apps/api
+COPY tsconfig.base.json ./
+
+RUN npm run build -w @avtoklyuch/shared \
+ && npm run build -w @avtoklyuch/api \
+ # Тесты дев-зависимостей в финальный образ не едут
+ && npm prune --omit=dev
+
+# ─── Исполнение ──────────────────────────────────────────────────────────────
+FROM node:20-bookworm-slim AS runtime
+
+WORKDIR /srv
+ENV NODE_ENV=production
+
+COPY --from=build /srv/node_modules node_modules
+COPY --from=build /srv/package.json package.json
+COPY --from=build /srv/packages/shared/dist packages/shared/dist
+COPY --from=build /srv/packages/shared/package.json packages/shared/package.json
+COPY --from=build /srv/apps/api/dist apps/api/dist
+COPY --from=build /srv/apps/api/package.json apps/api/package.json
+# SQL-миграции не проходят через tsc — копируем как есть
+COPY apps/api/src/db/migrations apps/api/dist/db/migrations
+
+# Не от root: у процесса нет причин иметь лишние права
+RUN mkdir -p /data/uploads && chown -R node:node /data /srv
+USER node
+
+EXPOSE 3000
+
+# Проверка живости: оркестратор должен видеть, что процесс не просто запущен
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+CMD ["node", "apps/api/dist/server.js"]

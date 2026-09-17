@@ -1,0 +1,34 @@
+# Образ для разработки: один на api, app и site — разница только в команде.
+FROM node:20-bookworm-slim
+
+WORKDIR /srv
+
+# Зависимости ставим слоем выше исходников: правка кода не пересобирает npm install
+COPY package.json package-lock.json ./
+COPY packages/shared/package.json packages/shared/
+COPY apps/api/package.json apps/api/
+COPY apps/app/package.json apps/app/
+COPY apps/site-autokey/package.json apps/site-autokey/
+COPY apps/site-westauto/package.json apps/site-westauto/
+
+RUN npm ci
+
+COPY . .
+
+# Общий пакет нужен собранным до старта api
+RUN npm run build -w @avtoklyuch/shared
+
+# Каталоги под кеш и под анонимные тома создаём заранее: пустой том Docker
+# создаёт от root, и процесс под node потом не может в него писать.
+RUN mkdir -p /srv/.cache/vite-app /srv/.cache/vite-site \
+             /srv/apps/app/node_modules /srv/apps/site-autokey/node_modules \
+             /srv/apps/api/node_modules /srv/packages/shared/node_modules \
+             /srv/apps/site-westauto/node_modules /srv/.cache/vite-westauto
+
+# Контейнер пишет в примонтированный репозиторий (dist общего пакета,
+# кеш Vite). От root он оставлял бы там файлы, которые хост не может
+# перезаписать, поэтому работаем под node — это ровно uid 1000.
+RUN chown -R node:node /srv
+USER node
+
+EXPOSE 3000 5173 5174 5175

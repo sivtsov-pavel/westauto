@@ -1,0 +1,131 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Режим разработки. Открывается на http://local.westauto.com.ua
+#
+#   docker compose up --build
+#
+# Боевая сборка — в docker-compose.prod.yml
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: avtoklyuch
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      # Украинская локаль для сортировок и дат
+      LANG: uk_UA.utf8
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # Наружу не выставляем: ходить в базу нужно только сервисам из этой сети.
+    # Нужен psql с хоста — docker compose exec db psql -U ${POSTGRES_USER}
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.dev
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      API_PORT: 3000
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_TTL_HOURS: ${SESSION_TTL_HOURS}
+      BOOTSTRAP_ADMIN_LOGIN: ${BOOTSTRAP_ADMIN_LOGIN}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD}
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME}
+      BAZA_GAI_API_KEY: ${BAZA_GAI_API_KEY}
+      BAZA_GAI_BASE_URL: ${BAZA_GAI_BASE_URL}
+      BAZA_GAI_TIMEOUT_MS: ${BAZA_GAI_TIMEOUT_MS}
+      NBU_RATES_URL: ${NBU_RATES_URL}
+      FX_REFRESH_MINUTES: ${FX_REFRESH_MINUTES}
+      LOT_FETCHER_ENABLED: ${LOT_FETCHER_ENABLED}
+      LOT_FETCHER_TIMEOUT_MS: ${LOT_FETCHER_TIMEOUT_MS}
+      UPLOADS_DIR: /data/uploads
+    volumes:
+      - ./packages:/srv/packages
+      - ./apps/api:/srv/apps/api
+      - uploads:/data/uploads
+      # node_modules берём из образа, а не с хоста
+      - /srv/node_modules
+      - /srv/apps/api/node_modules
+    # Общий пакет пересобирается на лету: правка движка расчёта сразу
+    # доезжает и до API, и до фронтенда
+    command: >
+      sh -c "npm run build:watch -w @avtoklyuch/shared &
+             npm run dev -w @avtoklyuch/api"
+
+  site:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.dev
+    restart: unless-stopped
+    depends_on: [api]
+    environment:
+      API_URL: http://api:3000
+      HTTP_PORT: ${HTTP_PORT}
+      VITE_CACHE_DIR: /srv/.cache/vite-site
+    volumes:
+      - ./packages:/srv/packages
+      - ./apps/site-autokey:/srv/apps/site-autokey
+      - /srv/node_modules
+      - /srv/apps/site-autokey/node_modules
+    command: npm run dev -w @avtoklyuch/site-autokey
+
+  westauto:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.dev
+    restart: unless-stopped
+    depends_on: [api]
+    environment:
+      API_URL: http://api:3000
+      HTTP_PORT: ${HTTP_PORT}
+      VITE_CACHE_DIR: /srv/.cache/vite-westauto
+    volumes:
+      - ./packages:/srv/packages
+      - ./apps/site-westauto:/srv/apps/site-westauto
+      - /srv/node_modules
+      - /srv/apps/site-westauto/node_modules
+    command: npm run dev -w @avtoklyuch/site-westauto
+
+  app:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.dev
+    restart: unless-stopped
+    depends_on: [api]
+    environment:
+      API_URL: http://api:3000
+      HTTP_PORT: ${HTTP_PORT}
+      VITE_CACHE_DIR: /srv/.cache/vite-app
+    volumes:
+      - ./packages:/srv/packages
+      - ./apps/app:/srv/apps/app
+      - /srv/node_modules
+      - /srv/apps/app/node_modules
+    command: npm run dev -w @avtoklyuch/app
+
+  web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on: [api, site, westauto, app]
+    ports:
+      - '${HTTP_PORT}:80'
+    volumes:
+      - ./infra/nginx/dev.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  pgdata:
+  uploads:

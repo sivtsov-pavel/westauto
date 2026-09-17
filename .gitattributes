@@ -1,0 +1,13 @@
+# Единые переводы строк: иначе переход между WSL, macOS и сервером
+# рождает изменения в каждом файле
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.woff2 binary
+*.pdf binary
+*.tar.gz binary

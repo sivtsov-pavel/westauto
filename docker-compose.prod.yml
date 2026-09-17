@@ -1,0 +1,80 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Боевая сборка под Debian-инстанс GCP.
+#
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Перед запуском в .env обязательно заменить: JWT_SECRET (openssl rand -hex 48),
+# POSTGRES_PASSWORD и пароль первого администратора.
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: avtoklyuch-prod
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.api
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      API_PORT: 3000
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_TTL_HOURS: ${SESSION_TTL_HOURS}
+      BOOTSTRAP_ADMIN_LOGIN: ${BOOTSTRAP_ADMIN_LOGIN}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD}
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME}
+      BAZA_GAI_API_KEY: ${BAZA_GAI_API_KEY}
+      BAZA_GAI_BASE_URL: ${BAZA_GAI_BASE_URL}
+      BAZA_GAI_TIMEOUT_MS: ${BAZA_GAI_TIMEOUT_MS}
+      NBU_RATES_URL: ${NBU_RATES_URL}
+      FX_REFRESH_MINUTES: ${FX_REFRESH_MINUTES}
+      LOT_FETCHER_ENABLED: ${LOT_FETCHER_ENABLED}
+      LOT_FETCHER_TIMEOUT_MS: ${LOT_FETCHER_TIMEOUT_MS}
+      UPLOADS_DIR: /data/uploads
+    volumes:
+      - uploads:/data/uploads
+
+  site:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.web
+      target: site
+    restart: always
+    depends_on: [api]
+    environment:
+      NODE_ENV: production
+      SITE_PORT: 4173
+      API_URL: http://api:3000
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.web
+      target: runtime
+    restart: always
+    depends_on: [api, site]
+    ports:
+      - '${HTTP_PORT}:80'
+
+volumes:
+  pgdata:
+  uploads:
