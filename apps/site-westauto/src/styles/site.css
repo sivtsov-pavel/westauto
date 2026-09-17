@@ -1179,3 +1179,34 @@ p { margin: 0; }
 }
 
 .agent-link:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+/* ─── Шапка на вузьких екранах ─────────────────────────────────────────── */
+
+/*
+  На телефоні в шапку не влазить усе одразу, і логотип виїжджав за екран.
+  Головне тут — логотип і меню; заклик до дії дублює плаваюча кнопка
+  дзвінка внизу, тож у шапці він зайвий.
+*/
+@media (max-width: 720px) {
+  .header-inner {
+    gap: 12px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .logo img { height: 34px; }
+
+  /* Кнопка «Розрахувати вартість» ховається: знизу вже є кнопка дзвінка */
+  .header-actions > .btn { display: none; }
+
+  .lang a { padding: 8px 9px; font-size: 11px; }
+}
+
+@media (max-width: 400px) {
+  /* Найвужчі екрани: лишаємо логотип і бургер, мову перенесено в меню */
+  .header-actions .lang { display: none; }
+  .nav.open .lang-inline { display: flex; }
+}
+
+/* Перемикач мов усередині відкритого меню — для найвужчих екранів */
+.lang-inline { display: none; padding: 14px 0 4px; }

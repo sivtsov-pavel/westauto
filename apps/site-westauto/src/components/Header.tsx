@@ -45,6 +45,21 @@ export function Header() {
               </Link>
             );
           })}
+
+          {/* На найвужчих екранах перемикач мов не влазить у шапку —
+              показуємо його всередині відкритого меню */}
+          <div className="lang lang-inline" role="group" aria-label="Language">
+            {LOCALES.map((code) => (
+              <a
+                key={code}
+                href={pathForLocale(rest, code)}
+                aria-current={code === locale}
+                hrefLang={code}
+              >
+                {LOCALE_LABELS[code]}
+              </a>
+            ))}
+          </div>
         </nav>
 
         <div className="header-actions">
