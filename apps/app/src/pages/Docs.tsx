@@ -543,7 +543,7 @@ function AdminSection() {
         </p>
         <p>
           На стороне DNS нужна одна запись со звёздочкой{' '}
-          <code>*.westauto.seoshkin.tools</code> — иначе под каждого нового агента придётся
+          <code>*.westauto.com.ua</code> — иначе под каждого нового агента придётся
           заводить запись вручную.
         </p>
       </Card>

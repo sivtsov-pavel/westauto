@@ -187,7 +187,7 @@ async function resolveStatic(pathname: string): Promise<string | null> {
 }
 
 function buildOrigin(host: string | undefined): string {
-  const clean = (host ?? 'westauto.seoshkin.tools').split(',')[0]!.trim();
+  const clean = (host ?? 'westauto.com.ua').split(',')[0]!.trim();
   const local = clean.includes('localhost') || clean.startsWith('127.') || clean.includes(':8081');
   return `${local ? 'http' : 'https'}://${clean}`;
 }

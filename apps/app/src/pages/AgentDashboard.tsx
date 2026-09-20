@@ -53,8 +53,12 @@ export function AgentDashboard() {
   if (!agent || !stats) return <div className="empty">Кабинет доступен только агентам.</div>;
 
   const primaryDomain = agent.domains.find((d) => d.isActive)?.host;
+  // Ссылку строим от домена самого агента, а если он не заведён — от адреса,
+  // на котором открыта CRM. Жёстко вписанный домен пережил бы переезд сайта
+  // и молча раздавал бы агентам ссылки на старый адрес.
+  const refHost = primaryDomain ?? window.location.host;
   const refLink = agent.referralCode
-    ? `https://westauto.seoshkin.tools/?ref=${agent.referralCode}`
+    ? `https://${refHost}/?ref=${agent.referralCode}`
     : null;
 
   async function copy(text: string) {

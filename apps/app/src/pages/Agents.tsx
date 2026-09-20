@@ -432,7 +432,7 @@ function DomainsModal({
             value={host}
             onChange={(e) => setHost(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') void add(); }}
-            placeholder="ivan.westauto.seoshkin.tools"
+            placeholder="ivan.westauto.com.ua"
           />
           <button type="button" className="btn btn-sm btn-primary" onClick={() => void add()}>
             Добавить
