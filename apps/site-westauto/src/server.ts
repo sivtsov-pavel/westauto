@@ -2,6 +2,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 import { localeFromAcceptLanguage, LOCALE_TAGS, type Locale } from '@avtoklyuch/shared';
+import { legacyTarget } from './legacy';
 
 /**
  * Сервер сайту WestAuto.
@@ -82,6 +83,14 @@ async function handle(
   acceptLanguage: string | undefined,
 ): Promise<{ status: number; headers: Record<string, string>; body: string | Buffer }> {
   const { pathname, search } = new URL(url, 'http://localhost');
+
+  // Адреса прежнего сайта компании — до разбора косой: в старых ссылках она
+  // стоит почти всегда, и без этого каждый такой переход шёл бы двумя
+  // прыжками вместо одного
+  const legacy = legacyTarget(pathname);
+  if (legacy) {
+    return { status: 301, headers: { Location: legacy }, body: '' };
+  }
 
   // Хвостовая косая — для поисковика отдельный адрес, а в старых ссылках она
   // стоит почти всегда. Поэтому не 404, а перевод на канонический адрес:
