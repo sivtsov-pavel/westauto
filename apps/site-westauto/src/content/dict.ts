@@ -327,6 +327,16 @@ export const dict = {
   'install.action': { uk: 'Встановити',     ru: 'Установить',     en: 'Install' },
   'install.later':  { uk: 'Не зараз',       ru: 'Не сейчас',      en: 'Not now' },
 
+  // ── Сторінку не знайдено ──────────────────────────────────────────────────
+  'notFound.title': { uk: 'Сторінку не знайдено', ru: 'Страница не найдена', en: 'Page not found' },
+  'notFound.text': {
+    uk: 'Можливо, адреса змінилася або сторінку прибрали. Подивіться авто у продажу — вітрина оновлюється щодня.',
+    ru: 'Возможно, адрес изменился или страницу убрали. Посмотрите авто в продаже — витрина обновляется каждый день.',
+    en: 'The address may have changed or the page was removed. Take a look at the cars we have — the showroom is updated daily.',
+  },
+  'notFound.cars':  { uk: 'Авто у продажу', ru: 'Авто в продаже', en: 'Cars available' },
+  'notFound.home':  { uk: 'На головну',     ru: 'На главную',     en: 'Home' },
+
   // ── Общее ─────────────────────────────────────────────────────────────────
   'common.loading':  { uk: 'Завантаження…', ru: 'Загрузка…',  en: 'Loading…' },
 } satisfies Dict<string>;

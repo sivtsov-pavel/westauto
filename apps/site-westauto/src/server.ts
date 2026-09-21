@@ -48,6 +48,7 @@ interface SsrModule {
     };
   };
   routeDataRequests: (pathname: string) => { key: string; apiPath: string } | null;
+  isMissingPage: (pathname: string) => boolean;
 }
 
 const ssr = (await import(SSR_ENTRY)) as SsrModule;
@@ -80,7 +81,18 @@ async function handle(
   host: string | undefined,
   acceptLanguage: string | undefined,
 ): Promise<{ status: number; headers: Record<string, string>; body: string | Buffer }> {
-  const { pathname } = new URL(url, 'http://localhost');
+  const { pathname, search } = new URL(url, 'http://localhost');
+
+  // Хвостовая косая — для поисковика отдельный адрес, а в старых ссылках она
+  // стоит почти всегда. Поэтому не 404, а перевод на канонический адрес:
+  // иначе /auto/ и /auto — две страницы с одним содержимым.
+  if (pathname !== '/' && pathname.endsWith('/')) {
+    return {
+      status: 301,
+      headers: { Location: (pathname.replace(/\/+$/, '') || '/') + search },
+      body: '',
+    };
+  }
 
   if (extname(pathname)) {
     const file = await resolveStatic(pathname);
@@ -102,7 +114,8 @@ async function handle(
 
   const request = ssr.routeDataRequests(pathname);
   const data: Record<string, unknown> = {};
-  let notFound = false;
+  // Несуществующий маршрут и пропавшая статья видны сразу, без похода в API
+  let notFound = ssr.isMissingPage(pathname);
 
   if (request) {
     try {

@@ -1,6 +1,7 @@
 import { formatMoney, LOCALE_TAGS, pathForLocale, type Locale } from '@avtoklyuch/shared';
 import { findArticle } from './content/articles';
 import { dict } from './content/dict';
+import { matchRoutePath } from './routes';
 
 export interface PageMeta {
   title: string;
@@ -30,6 +31,12 @@ export function metaForRoute(path: string, locale: Locale, data: unknown): PageM
 
   const s = (key: keyof typeof dict): string => dict[key][locale];
 
+  // Выдуманный адрес — свой заголовок, а не заголовок главной: иначе в
+  // выдаче страницы-призраки не отличить от настоящей главной
+  if (!matchRoutePath(path)) {
+    return { ...base(`${s('notFound.title')} — WestAuto`, s('notFound.text')), noindex: true };
+  }
+
   if (path === '/auto') {
     return base(`${s('cars.title')} — WestAuto`, s('cars.lead'));
   }
@@ -55,7 +62,9 @@ export function metaForRoute(path: string, locale: Locale, data: unknown): PageM
     if (article) {
       return base(`${article.title[locale]} — WestAuto`, article.excerpt[locale]);
     }
-    return base(`${s('blog.title')} — WestAuto`, s('blog.lead'));
+    // Статьи с таким адресом нет — страница отвечает 404, и заголовок должен
+    // говорить то же самое. Заголовок блога здесь вводил бы в заблуждение
+    return { ...base(`${s('notFound.title')} — WestAuto`, s('notFound.text')), noindex: true };
   }
 
   if (path.startsWith('/rozrahunok/')) {

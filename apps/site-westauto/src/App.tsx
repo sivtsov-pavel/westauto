@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { CallFab } from '@/components/CallFab';
 import { InstallBanner } from '@/components/InstallBanner';
@@ -8,7 +9,20 @@ import { Blog } from '@/pages/Blog';
 import { CarDetail } from '@/pages/CarDetail';
 import { Cars } from '@/pages/Cars';
 import { Home } from '@/pages/Home';
+import { NotFound } from '@/pages/NotFound';
 import { SharedCalculation } from '@/pages/SharedCalculation';
+import { ROUTE_PATHS, type RoutePath } from '@/routes';
+
+/** Какая страница за каким маршрутом. Ключи — весь список из routes.ts:
+ *  пропустить маршрут или выдумать лишний не даст проверка типов. */
+const PAGES: Record<RoutePath, ReactElement> = {
+  '/': <Home />,
+  '/auto': <Cars />,
+  '/auto/:slug': <CarDetail />,
+  '/blog': <Blog />,
+  '/blog/:slug': <Article />,
+  '/rozrahunok/:token': <SharedCalculation />,
+};
 
 /**
  * Маршруты дублируются под префиксами языков.
@@ -19,13 +33,16 @@ import { SharedCalculation } from '@/pages/SharedCalculation';
  */
 const ROUTES = (
   <>
-    <Route index element={<Home />} />
-    <Route path="auto" element={<Cars />} />
-    <Route path="auto/:slug" element={<CarDetail />} />
-    <Route path="blog" element={<Blog />} />
-    <Route path="blog/:slug" element={<Article />} />
-    <Route path="rozrahunok/:token" element={<SharedCalculation />} />
-    <Route path="*" element={<Home />} />
+    {ROUTE_PATHS.map((path) =>
+      path === '/' ? (
+        <Route key={path} index element={PAGES[path]} />
+      ) : (
+        <Route key={path} path={path.slice(1)} element={PAGES[path]} />
+      ),
+    )}
+    {/* Несуществующий адрес показывает «страницы нет», а не главную:
+        сервер по этому же признаку отвечает 404 */}
+    <Route path="*" element={<NotFound />} />
   </>
 );
 
