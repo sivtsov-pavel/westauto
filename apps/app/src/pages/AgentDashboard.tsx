@@ -87,7 +87,7 @@ export function AgentDashboard() {
       </header>
 
       <div className="page">
-        <div className="grid-4">
+        <div className="grid-4" data-tour="cabinet">
           <StatCard label="Клиентов приведено" value={String(stats.leadsTotal)} />
           <StatCard label="Из них новых" value={String(stats.leadsNew)} accent={stats.leadsNew > 0} />
           <StatCard label="Сделок закрыто" value={String(stats.dealsWon)} />

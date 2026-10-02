@@ -127,14 +127,14 @@ export function Dashboard() {
 
       <div className="page">
         {empty ? (
-          <div className="card">
+          <div className="card" data-tour="dashboard">
             <div className="empty">
               Как только появятся клиенты и сделки, здесь будут деньги в работе,
               движение по этапам и рост по месяцам.
             </div>
           </div>
         ) : (
-          <div className="dash">
+          <div className="dash" data-tour="dashboard">
             {/* ─── Деньги: главная плитка ─── */}
             <section className="card dash-money">
               <div className="card-head">

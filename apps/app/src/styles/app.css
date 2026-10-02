@@ -1805,3 +1805,99 @@ select:disabled {
   .dash-money, .dash-wide { grid-column: span 1; }
   .dash-money-figures, .dash-articles { grid-template-columns: 1fr; }
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Тур по системе.
+   Подсветка — прямоугольник с огромной тенью: он затемняет всё вокруг себя
+   и остаётся светлым сам, без SVG-масок и вырезанных картинок. Клики ловит
+   отдельный прозрачный слой: тень в попадании курсора не участвует.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.tour-blocker {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+}
+
+/* Когда цели нет и выреза не будет, затемняет сам слой —
+   иначе карточка висела бы на незатемнённой странице */
+.tour-blocker-dim {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.tour-spot {
+  position: fixed;
+  z-index: 301;
+  border-radius: var(--radius-md);
+  box-shadow:
+    0 0 0 9999px rgba(0, 0, 0, 0.6),
+    0 0 0 2px var(--accent);
+  /* Курсор проходит сквозь вырез к слою-перехватчику под ним */
+  pointer-events: none;
+  transition: top 0.2s ease, left 0.2s ease, width 0.2s ease, height 0.2s ease;
+}
+
+.tour-card {
+  position: fixed;
+  z-index: 302;
+  width: 340px;
+  max-width: calc(100vw - 24px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Цель не нашлась или экран узкий — карточка по центру экрана */
+.tour-card-centered {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.tour-counter {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tour-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.tour-text {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text-soft);
+}
+
+.tour-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/*
+  Узкий экран: карточка прижата к низу по центру. Ставить её рядом с вырезом
+  негде — на телефоне подсвеченный блок занимает почти всю ширину, и карточка
+  либо закрыла бы его, либо уехала за край.
+*/
+@media (max-width: 760px) {
+  .tour-card-centered {
+    top: auto;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: none;
+    transform: none;
+  }
+}

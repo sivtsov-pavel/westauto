@@ -93,7 +93,7 @@ export function Showcase() {
         {loading && <div className="empty">Загружаю…</div>}
 
         {!loading && items.length === 0 && (
-          <div className="card">
+          <div className="card" data-tour="showcase">
             <div className="empty">
               Витрина пуста. Нажмите «Опубликовать расчёт» — карточка соберётся из готового
               расчёта, останется добавить фото и пробег.
@@ -102,7 +102,7 @@ export function Showcase() {
         )}
 
         {items.length > 0 && (
-          <section className="card">
+          <section className="card" data-tour="showcase">
             <div className="table-scroll">
               <table className="table">
                 <thead>

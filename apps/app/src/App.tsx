@@ -3,9 +3,11 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { api, ApiError } from '@/api/client';
 import type { BootstrapResponse } from '@/api/types';
 import { Sidebar } from '@/components/Layout';
+import { Tour } from '@/components/Tour';
 import { AgentDashboard } from '@/pages/AgentDashboard';
 import { Agents } from '@/pages/Agents';
 import { Calculator } from '@/pages/Calculator';
+import { ChangePassword } from '@/pages/ChangePassword';
 import { Clients } from '@/pages/Clients';
 import { Dashboard } from '@/pages/Dashboard';
 import { Deals } from '@/pages/Deals';
@@ -19,9 +21,10 @@ import { Tariffs } from '@/pages/Tariffs';
 import { Watchlist } from '@/pages/Watchlist';
 import { useAuth } from '@/state/auth';
 import { useTheme } from '@/state/theme';
+import { TourProvider } from '@/state/tour';
 
 export function App() {
-  const { user, loading } = useAuth();
+  const { user, loading, mustChangePassword } = useAuth();
   // Тема применяется до отрисовки экранов, иначе на входе мелькает чужой фон
   useTheme();
 
@@ -30,6 +33,15 @@ export function App() {
   }
 
   if (!user) return <Login />;
+
+  /*
+   * Экран смены пароля вместо приложения, а не поверх него.
+   *
+   * Сервер всё равно отвечает 403 на любой запрос, кроме смены пароля, —
+   * показывать за этим экраном нечего, а закрываемое окно означало бы, что
+   * человек продолжит работать под паролем, который знает ещё кто-то.
+   */
+  if (mustChangePassword) return <ChangePassword />;
 
   return <AuthenticatedApp />;
 }
@@ -70,31 +82,37 @@ function AuthenticatedApp() {
   }
 
   return (
-    <div className="shell">
-      <Sidebar />
-      <main className="main">
-        <Routes>
-          {/* Сводка на главной: открыв систему, человек первым делом видит
-              деньги и движение машин, а не пустую форму расчёта */}
-          <Route path="/" element={<Dashboard />} />
-          <Route
-            path="/calc"
-            element={<Calculator bootstrap={bootstrap} onBootstrapReload={() => void load()} />}
-          />
-          <Route path="/history" element={<History />} />
-          <Route path="/cabinet" element={<AgentDashboard />} />
-          <Route path="/agents" element={<Agents />} />
-          <Route path="/leads" element={<Leads />} />
-          <Route path="/clients" element={<Clients />} />
-          <Route path="/deals" element={<Deals />} />
-          <Route path="/watchlist" element={<Watchlist />} />
-          <Route path="/showcase" element={<Showcase />} />
-          <Route path="/tariffs" element={<Tariffs />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/docs" element={<Docs />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-    </div>
+    // Тур объявлен здесь: ему нужны роль, маршруты и уже отрисованные экраны
+    <TourProvider>
+      <div className="shell">
+        <Sidebar />
+        <main className="main">
+          <Routes>
+            {/* Сводка на главной: открыв систему, человек первым делом видит
+                деньги и движение машин, а не пустую форму расчёта */}
+            <Route path="/" element={<Dashboard />} />
+            <Route
+              path="/calc"
+              element={<Calculator bootstrap={bootstrap} onBootstrapReload={() => void load()} />}
+            />
+            <Route path="/history" element={<History />} />
+            <Route path="/cabinet" element={<AgentDashboard />} />
+            <Route path="/agents" element={<Agents />} />
+            <Route path="/leads" element={<Leads />} />
+            <Route path="/clients" element={<Clients />} />
+            <Route path="/deals" element={<Deals />} />
+            <Route path="/watchlist" element={<Watchlist />} />
+            <Route path="/showcase" element={<Showcase />} />
+            <Route path="/tariffs" element={<Tariffs />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/docs" element={<Docs />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+      </div>
+
+      {/* Поверх всего: затемнение, подсветка и карточка тура */}
+      <Tour />
+    </TourProvider>
   );
 }

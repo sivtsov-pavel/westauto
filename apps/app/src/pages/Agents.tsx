@@ -103,8 +103,10 @@ export function Agents() {
       <div className="page">
         {loading && <div className="empty">Загружаю…</div>}
 
+        {/* data-tour — и на пустом списке, и на таблице: рисуется
+            одна из двух ветвей, тур подсветит ту, что на экране */}
         {!loading && items.length === 0 && (
-          <div className="card">
+          <div className="card" data-tour="agents">
             <div className="empty">
               Агентов пока нет. Заведите первого — он получит доступ в систему,
               личную ссылку и, при желании, отдельный домен под свой сайт.
@@ -113,7 +115,7 @@ export function Agents() {
         )}
 
         {items.length > 0 && (
-          <section className="card">
+          <section className="card" data-tour="agents">
             <div className="table-scroll">
               <table className="table">
                 <thead>

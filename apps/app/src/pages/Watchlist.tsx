@@ -128,7 +128,7 @@ export function Watchlist() {
         {loading && <div className="empty">Загружаю…</div>}
 
         {!loading && items.length === 0 && (
-          <div className="card">
+          <div className="card" data-tour="watchlist">
             <div className="empty">
               Список пуст. Добавьте лот, на который идут торги, укажите свой потолок — система
               предупредит, когда ставка его превысит.
@@ -137,7 +137,7 @@ export function Watchlist() {
         )}
 
         {items.length > 0 && (
-          <section className="card">
+          <section className="card" data-tour="watchlist">
             <div className="table-scroll">
               <table className="table">
                 <thead>

@@ -8,10 +8,53 @@ export class ApiError extends Error {
     readonly status: number,
     message: string,
     readonly issues?: { field: string; message: string }[],
+    /** Машиночитаемая причина отказа. Разбирать текст сообщения нельзя:
+        он меняется при первой же правке формулировки */
+    readonly code?: string,
   ) {
     super(message);
     this.name = 'ApiError';
   }
+}
+
+/**
+ * Код из `details.code`, которым сервер держит человека на экране смены
+ * выданного пароля (apps/api/src/lib/password-policy.ts).
+ */
+export const PASSWORD_CHANGE_REQUIRED = 'password_change_required';
+
+/**
+ * Единая точка, где приложение узнаёт о требовании сменить пароль.
+ *
+ * Флаг может появиться, пока человек работает: администратор сбросил пароль,
+ * и следующий же запрос вернёт 403. Разбирать это в каждом месте, где мы
+ * что-то грузим, невозможно — поэтому слушателя ставит AuthProvider, а
+ * клиент сообщает ему о таком ответе до того, как бросит ошибку наверх.
+ */
+type PasswordChangeListener = () => void;
+let passwordChangeListener: PasswordChangeListener | null = null;
+
+export function onPasswordChangeRequired(listener: PasswordChangeListener): () => void {
+  passwordChangeListener = listener;
+  return () => {
+    if (passwordChangeListener === listener) passwordChangeListener = null;
+  };
+}
+
+/** Собирает ApiError из неуспешного ответа и попутно ловит 403 про пароль */
+function toApiError(status: number, payload: unknown, fallback: string): ApiError {
+  const body = payload as {
+    error?: string;
+    issues?: { field: string; message: string }[];
+    details?: { code?: string };
+  } | null;
+  const code = body?.details?.code;
+
+  if (status === 403 && code === PASSWORD_CHANGE_REQUIRED) {
+    passwordChangeListener?.();
+  }
+
+  return new ApiError(status, body?.error ?? fallback, body?.issues, code);
 }
 
 type Query = Record<string, string | number | boolean | undefined | null>;
@@ -47,11 +90,7 @@ async function request<T>(
   const payload = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new ApiError(
-      response.status,
-      (payload as { error?: string } | null)?.error ?? `Ошибка ${response.status}`,
-      (payload as { issues?: { field: string; message: string }[] } | null)?.issues,
-    );
+    throw toApiError(response.status, payload, `Ошибка ${response.status}`);
   }
 
   return payload as T;
@@ -79,10 +118,7 @@ export const api = {
     });
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
-      throw new ApiError(
-        response.status,
-        (payload as { error?: string } | null)?.error ?? 'Не удалось загрузить файл',
-      );
+      throw toApiError(response.status, payload, 'Не удалось загрузить файл');
     }
     return payload as T;
   },

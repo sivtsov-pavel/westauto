@@ -73,7 +73,11 @@ export function Sidebar() {
             if (item.needs && !can(user.role, item.needs)) return false;
             return true;
           }).map(({ to, label, icon: Icon, end }) => (
-            <NavLink key={to} to={to} end={end}>
+            // data-tour: запасная цель для тура, когда на странице
+            // подсвечивать нечего — список пуст на свежем экземпляре.
+            // Атрибут ставится из того же списка, что и сам пункт, поэтому
+            // он есть ровно у разделов, доступных этой роли (components/Tour.tsx)
+            <NavLink key={to} to={to} end={end} data-tour={`nav:${to}`}>
               <Icon />
               {label}
             </NavLink>

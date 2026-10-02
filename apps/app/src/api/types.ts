@@ -17,6 +17,12 @@ export interface SessionUser {
   fullName: string;
   role: Role;
   deliveryDiscountPercent: number;
+  /**
+   * Пароль выдан администратором и ещё не сменён. Пока флаг стоит, сервер
+   * отвечает 403 на всё, кроме смены пароля, — интерфейс обязан показывать
+   * экран смены, а не приложение.
+   */
+  mustChangePassword: boolean;
 }
 
 export interface DeliveryTariffRow {
@@ -90,6 +96,8 @@ export interface CalculationRecord {
   costUsd: number;
   marginUsd: number;
   clientTotalUsd: number;
+  /** Учебная запись: показывается с меткой и скрывается настройкой */
+  isDemo: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -152,6 +160,7 @@ export interface LeadRow {
   agentName: string | null;
   source: string;
   isProcessed: boolean;
+  isDemo: boolean;
   createdAt: string;
 }
 
@@ -191,6 +200,7 @@ export interface ClientRow {
   agentName: string | null;
   managerId: string | null;
   notes: string | null;
+  isDemo: boolean;
   dealsCount: number;
   lastDealAt: string | null;
   createdAt: string;
@@ -219,6 +229,7 @@ export interface DealRow {
   portArrivedAt: string | null;
   deliveredAt: string | null;
   notes: string | null;
+  isDemo: boolean;
   /** Итоги в долларах: гривневые суммы уже пересчитаны на стороне базы */
   plannedUsd: number;
   paidUsd: number;

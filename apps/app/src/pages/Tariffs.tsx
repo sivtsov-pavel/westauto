@@ -185,7 +185,7 @@ export function Tariffs() {
           </div>
         )}
 
-        <section className="card">
+        <section className="card" data-tour="tariffs">
           <div className="card-head">
             <div className="section-title">Тарифы доставки</div>
             <div className="row-flex" style={{ gap: 8 }}>

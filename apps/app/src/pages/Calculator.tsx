@@ -397,7 +397,7 @@ function CalculatorBody({
 
         <div className="calc-layout">
           {/* ─── Данные лота ─────────────────────────────────────────────── */}
-          <section className="card stack" style={{ gap: 14 }}>
+          <section className="card stack" style={{ gap: 14 }} data-tour="calc-lot">
             <div className="section-title">Данные лота</div>
 
             <label className="field">
