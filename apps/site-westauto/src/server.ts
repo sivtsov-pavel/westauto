@@ -2,6 +2,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 import { localeFromAcceptLanguage, LOCALE_TAGS, type Locale } from '@avtoklyuch/shared';
+import { APP, BRAND, PALETTE, PROFILE_ID } from './content/brand';
 import { legacyTarget } from './legacy';
 
 /**
@@ -14,6 +15,25 @@ import { legacyTarget } from './legacy';
 
 const PORT = Number(process.env['SITE_PORT'] ?? 4174);
 const API_URL = process.env['API_URL'] ?? 'http://api:3000';
+
+/**
+ * Профиль бренда этого экземпляра.
+ *
+ * Сервер собирает страницы сам и профиль берёт из окружения, но в браузере
+ * окружения нет — поэтому значение впечатывается в <head> рядом с __SSR_DATA__.
+ * Пусто — не впечатываем вовсе: сайт WestAuto должен отдавать ровно ту же
+ * разметку, что и до появления профилей.
+ */
+const BRAND_PROFILE = process.env['BRAND_PROFILE'] ?? '';
+
+/**
+ * Экземпляр закрыт от индексации целиком.
+ *
+ * Демо и копии для показа клиенту в выдаче не нужны: те же тексты на чужом
+ * домене — это дубликат, который вредит и клиенту, и нам. Признак сильнее
+ * meta.noindex отдельных страниц: тот разрешает индексировать всё остальное.
+ */
+const NOINDEX_ALL = process.env['SITE_NOINDEX'] === 'true';
 const ROOT = process.cwd();
 const DIST = join(ROOT, 'apps/site-westauto/dist');
 const SSR_ENTRY = join(ROOT, 'apps/site-westauto/dist-ssr/entry-server.js');
@@ -103,6 +123,34 @@ async function handle(
     };
   }
 
+  // Оболочка приложения собирается по профилю, поэтому идёт до статики:
+  // одноимённые файлы в dist её бы перекрыли
+  if (pathname === '/manifest.webmanifest') {
+    return {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/manifest+json; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600',
+      },
+      body: buildManifest(),
+    };
+  }
+
+  if (pathname === '/sw.js') {
+    const source = await readFile(join(DIST, 'sw.js'), 'utf8');
+    return {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/javascript; charset=utf-8',
+        // no-cache, а не max-age: иначе старый worker живёт у человека
+        // сутками и правки оболочки до него не доезжают
+        'Cache-Control': 'no-cache',
+        'Service-Worker-Allowed': '/',
+      },
+      body: brandSw(source),
+    };
+  }
+
   if (extname(pathname)) {
     const file = await resolveStatic(pathname);
     if (file) {
@@ -175,25 +223,107 @@ async function handle(
       `<meta property="og:description" content="${escapeHtml(meta.description)}" />`,
     )
     .replace(
+      /<meta property="og:site_name"[^>]*>/,
+      `<meta property="og:site_name" content="${escapeHtml(BRAND.name)}" />`,
+    )
+    .replace(
+      /<meta name="apple-mobile-web-app-title"[^>]*>/,
+      `<meta name="apple-mobile-web-app-title" content="${escapeHtml(BRAND.name)}" />`,
+    )
+    .replace(
+      /<link rel="icon"[^>]*>/,
+      `<link rel="icon" type="image/png" href="${escapeHtml(APP.icons.favicon)}" />`,
+    )
+    .replace(
+      /<link rel="apple-touch-icon"[^>]*>/,
+      `<link rel="apple-touch-icon" href="${escapeHtml(APP.icons.appleTouch)}" />`,
+    )
+    .replace(
+      /<meta name="theme-color"[^>]*>/,
+      `<meta name="theme-color" content="${escapeHtml(PALETTE.themeColor)}" />`,
+    )
+    .replace(
       '</head>',
       `${alternates}\n` +
         `    <link rel="alternate" hreflang="x-default" href="${escapeHtml(origin + '/')}" />\n` +
-        (meta.noindex ? '    <meta name="robots" content="noindex, nofollow" />\n' : '') +
-        `    <script>window.__SSR_DATA__=${serialize(data)};window.__PREFERRED_LOCALE__=${JSON.stringify(preferred)}</script>\n  </head>`,
+        (meta.noindex || NOINDEX_ALL
+          ? '    <meta name="robots" content="noindex, nofollow" />\n'
+          : '') +
+        `    <script>window.__SSR_DATA__=${serialize(data)};window.__PREFERRED_LOCALE__=${JSON.stringify(preferred)}` +
+        // serialize, а не голый JSON.stringify: он же гасит «<» и разделители
+        // строк, которые внутри <script> сломали бы разбор страницы
+        (BRAND_PROFILE ? `;window.__BRAND_PROFILE__=${serialize(BRAND_PROFILE)}` : '') +
+        `</script>\n  </head>`,
     );
 
-  return {
-    status: notFound ? 404 : 200,
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Content-Language': LOCALE_TAGS[locale],
-      Vary: 'Accept-Language',
-      'Cache-Control': meta.noindex
-        ? 'private, no-store'
-        : 'public, max-age=60, stale-while-revalidate=300',
-    },
-    body: page,
+  const headers: Record<string, string> = {
+    'Content-Type': 'text/html; charset=utf-8',
+    'Content-Language': LOCALE_TAGS[locale],
+    Vary: 'Accept-Language',
+    'Cache-Control': meta.noindex
+      ? 'private, no-store'
+      : 'public, max-age=60, stale-while-revalidate=300',
   };
+
+  // Заголовком, а не только метатегом: метатег виден лишь тому, кто разобрал
+  // страницу, а заголовок действует и на картинки, и на ответы без разметки
+  if (NOINDEX_ALL) headers['X-Robots-Tag'] = 'noindex, nofollow';
+
+  return { status: notFound ? 404 : 200, headers, body: page };
+}
+
+/**
+ * Манифест приложения — маршрутом, а не файлом из каталога статики.
+ *
+ * Имя, иконки и цвета у каждого клиента свои, а файл в public один на образ:
+ * экземпляр Larus предлагал бы установить приложение с иконкой WestAuto. Из
+ * корня он отдаётся и по второй причине — область действия ограничена
+ * каталогом, из которого файл отдан, и манифест из /brand/ накрывал бы только
+ * /brand/.
+ */
+function buildManifest(): string {
+  return JSON.stringify(
+    {
+      name: APP.name,
+      short_name: APP.shortName,
+      description: APP.description,
+      lang: 'uk',
+      start_url: '/',
+      scope: '/',
+      display: 'standalone',
+      background_color: APP.backgroundColor,
+      theme_color: PALETTE.themeColor,
+      categories: ['business', 'shopping', 'travel'],
+      icons: [
+        { src: APP.icons.icon192, sizes: '192x192', type: 'image/png', purpose: 'any' },
+        { src: APP.icons.icon512, sizes: '512x512', type: 'image/png', purpose: 'any' },
+        { src: APP.icons.maskable512, sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      ],
+      shortcuts: [
+        { name: 'Авто в наявності', url: '/auto' },
+        { name: 'Корисне', url: '/blog' },
+      ],
+    },
+    null,
+    2,
+  );
+}
+
+/**
+ * Service worker с подстановкой профиля.
+ *
+ * Имя кеша обязано включать профиль: без этого у клиента в кеше оболочки
+ * осталась бы главная WestAuto, и вычистить её можно было бы только сменой
+ * версии вручную. Сам файл при этом остаётся рабочим сам по себе — в режиме
+ * разработки он отдаётся как есть, и подставлять там нечего.
+ */
+function brandSw(source: string): string {
+  return source
+    .replace(/const CACHE = '[^']*';/, `const CACHE = '${PROFILE_ID}-shell-v1';`)
+    .replace(
+      /const SHELL = \[[^\]]*\];/,
+      `const SHELL = ${JSON.stringify(['/', BRAND.logo, APP.icons.icon192])};`,
+    );
 }
 
 async function resolveStatic(pathname: string): Promise<string | null> {

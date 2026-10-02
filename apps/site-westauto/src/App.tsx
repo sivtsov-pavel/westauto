@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import { BrandTheme } from '@/components/BrandTheme';
 import { CallFab } from '@/components/CallFab';
 import { InstallBanner } from '@/components/InstallBanner';
 import { Footer } from '@/components/Footer';
@@ -49,6 +50,8 @@ const ROUTES = (
 export function App() {
   return (
     <>
+      {/* Цвета и шрифты бренда — до первой отрисовки, не после */}
+      <BrandTheme />
       <Header />
       <main>
         <Routes>

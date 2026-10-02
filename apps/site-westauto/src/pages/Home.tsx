@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { formatMoney } from '@avtoklyuch/shared';
 import { CarCard, type CarSummary } from '@/components/CarCard';
@@ -15,8 +16,7 @@ import { LeadForm } from '@/components/LeadForm';
 import { PublicCalculator } from '@/components/PublicCalculator';
 import { VideoCard } from '@/components/VideoCard';
 import { ARTICLES } from '@/content/articles';
-import { REVIEWS, STATS, VIDEOS } from '@/content/brand';
-import type { DictKey } from '@/content/dict';
+import { REVIEWS, STATS, STEPS_FLOW, VIDEOS } from '@/content/brand';
 import { useI18n } from '@/i18n';
 import { useRouteData } from '@/ssr-data';
 
@@ -29,7 +29,24 @@ const SERVICES = [
   { Icon: PlateIcon, key: 'svc.cert', descKey: 'svc.certД' },
 ] as const;
 
-const STEPS = Array.from({ length: 10 }, (_, i) => i + 1);
+/**
+ * Самая узкая колонка для сетки этапов.
+ *
+ * Сетка раскладывает карточки по ширине сама, но auto-fit дорисовывает
+ * последний ряд пустотой: шесть этапов в пяти колонках дают 5 + 1 и дыру на
+ * четыре ячейки — страница выглядит недоделанной. Поэтому берём делитель
+ * количества: тогда последний ряд заполнен целиком.
+ *
+ * Делителя может не быть (семь этапов, например) — там остаётся прежнее
+ * поведение: ровные широкие ряды важнее, чем короткий хвост.
+ */
+const WIDEST_ROW = 1150;
+
+function stepTrackMin(count: number): string {
+  const columns = [5, 4, 3].find((n) => count % n === 0) ?? 5;
+  // 1150 / 5 = 230 — ровно та ширина, что стояла в стилях до профилей
+  return `${Math.round(WIDEST_ROW / columns)}px`;
+}
 
 export function Home() {
   const { t, href, tag, locale } = useI18n();
@@ -113,11 +130,11 @@ export function Home() {
             {STATS.map((stat) => (
               <div className="stat" key={stat.labelKey}>
                 <div className="stat-value">
-                  {'prefix' in stat && stat.prefix ? <span>{stat.prefix}</span> : null}
+                  {stat.prefix ? <span>{stat.prefix}</span> : null}
                   {Number(stat.value).toLocaleString(tag)}
-                  {'suffix' in stat && stat.suffix ? <span>{stat.suffix}</span> : null}
+                  {stat.suffix ? <span>{stat.suffix}</span> : null}
                 </div>
-                <div className="stat-label">{t(stat.labelKey as DictKey)}</div>
+                <div className="stat-label">{t(stat.labelKey)}</div>
               </div>
             ))}
           </div>
@@ -154,16 +171,22 @@ export function Home() {
             <div className="stack">
               <div className="eyebrow">{t('steps.eyebrow')}</div>
               <h2 className="display h2 rule">{t('steps.title')}</h2>
-              <p className="lead" style={{ color: '#9fb2c0' }}>{t('steps.lead')}</p>
+              <p className="lead" style={{ color: 'var(--on-dark-soft)' }}>{t('steps.lead')}</p>
             </div>
           </div>
 
-          <div className="steps">
-            {STEPS.map((n) => (
-              <div className="step" key={n}>
-                <div className="step-num">{String(n).padStart(2, '0')}</div>
-                <h3>{t(`step.${n}` as DictKey)}</h3>
-                <p>{t(`step.${n}d` as DictKey)}</p>
+          {/* Номер рисуем по порядку, а не храним в профиле: у разных клиентов
+              разное число шагов, и выпавший из середины этап оставил бы дыру
+              в нумерации */}
+          <div
+            className="steps"
+            style={{ '--step-min': stepTrackMin(STEPS_FLOW.length) } as CSSProperties}
+          >
+            {STEPS_FLOW.map((step, index) => (
+              <div className="step" key={step.titleKey}>
+                <div className="step-num">{String(index + 1).padStart(2, '0')}</div>
+                <h3>{t(step.titleKey)}</h3>
+                <p>{t(step.descKey)}</p>
               </div>
             ))}
           </div>
@@ -233,50 +256,57 @@ export function Home() {
       </section>
 
       {/* ─── Отзывы ────────────────────────────────────────────────────── */}
-      <section className="section section-sand" id="reviews">
-        <div className="wrap">
-          <div className="section-head">
-            <div className="stack">
-              <div className="eyebrow">{t('reviews.eyebrow')}</div>
-              <h2 className="display h2 rule">{t('reviews.title')}</h2>
+      {/* У нового клиента отзывов в пригодном виде может не быть. Пустая
+          секция с заголовком «Что говорят клиенты» читается как обман —
+          поэтому скрываем блок целиком, а не только карточки */}
+      {REVIEWS.length > 0 ? (
+        <section className="section section-sand" id="reviews">
+          <div className="wrap">
+            <div className="section-head">
+              <div className="stack">
+                <div className="eyebrow">{t('reviews.eyebrow')}</div>
+                <h2 className="display h2 rule">{t('reviews.title')}</h2>
+              </div>
+            </div>
+
+            <div className="reviews">
+              {REVIEWS.map((review) => (
+                <div className="review" key={review.textKey}>
+                  <p>{t(review.textKey)}</p>
+                  <div className="review-author">
+                    <span className="review-avatar">{t(review.nameKey).charAt(0)}</span>
+                    <span className="stack" style={{ gap: 1 }}>
+                      <strong style={{ fontSize: 14.5 }}>{t(review.nameKey)}</strong>
+                      <span className="faint" style={{ fontSize: 13 }}>{t(review.noteKey)}</span>
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-
-          <div className="reviews">
-            {REVIEWS.map((review) => (
-              <div className="review" key={review.name}>
-                <p>{t(review.textKey as DictKey)}</p>
-                <div className="review-author">
-                  <span className="review-avatar">{review.name.charAt(0)}</span>
-                  <span className="stack" style={{ gap: 1 }}>
-                    <strong style={{ fontSize: 14.5 }}>{review.name}</strong>
-                    <span className="faint" style={{ fontSize: 13 }}>{review.car}</span>
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {/* ─── Видео ─────────────────────────────────────────────────────── */}
-      <section className="section" id="videos">
-        <div className="wrap">
-          <div className="section-head">
-            <div className="stack">
-              <div className="eyebrow">{t('videos.eyebrow')}</div>
-              <h2 className="display h2 rule">{t('videos.title')}</h2>
-              <p className="lead">{t('videos.lead')}</p>
+      {VIDEOS.length > 0 ? (
+        <section className="section" id="videos">
+          <div className="wrap">
+            <div className="section-head">
+              <div className="stack">
+                <div className="eyebrow">{t('videos.eyebrow')}</div>
+                <h2 className="display h2 rule">{t('videos.title')}</h2>
+                <p className="lead">{t('videos.lead')}</p>
+              </div>
+            </div>
+
+            <div className="videos">
+              {VIDEOS.map((video) => (
+                <VideoCard key={video.id} id={video.id} titleKey={video.titleKey} />
+              ))}
             </div>
           </div>
-
-          <div className="videos">
-            {VIDEOS.map((video) => (
-              <VideoCard key={video.id} id={video.id} titleKey={video.titleKey} />
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {/* ─── Статьи ────────────────────────────────────────────────────── */}
       <section className="section section-sand" id="blog">
@@ -321,7 +351,7 @@ export function Home() {
           <div className="stack" style={{ gap: 20, textAlign: 'center', alignItems: 'center' }}>
             <div className="eyebrow">{t('nav.calc')}</div>
             <h2 className="display h2">{t('lead.title')}</h2>
-            <p className="lead" style={{ color: '#9fb2c0', maxWidth: 620 }}>{t('lead.lead')}</p>
+            <p className="lead" style={{ color: 'var(--on-dark-soft)', maxWidth: 620 }}>{t('lead.lead')}</p>
             <div style={{ width: '100%', marginTop: 12 }}>
               <LeadForm source="home" />
             </div>

@@ -129,7 +129,7 @@ export function CarDetail() {
                       cursor: 'pointer',
                       background: 'none',
                       border: index === activePhoto
-                        ? '2px solid var(--red)'
+                        ? '2px solid var(--accent)'
                         : '1px solid var(--line)',
                     }}
                   >

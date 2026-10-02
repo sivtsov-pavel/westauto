@@ -106,7 +106,7 @@ export function LeadForm({ showcaseItemId = null, source = 'westauto', compact =
       </button>
 
       {state === 'error' && (
-        <div role="alert" style={{ gridColumn: '1 / -1', color: '#e22131', fontSize: 14 }}>
+        <div role="alert" style={{ gridColumn: '1 / -1', color: 'var(--accent)', fontSize: 14 }}>
           {t('lead.error')}
         </div>
       )}

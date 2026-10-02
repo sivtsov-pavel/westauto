@@ -55,6 +55,23 @@ export const dict = {
   'stats.avgPrice':  { uk: 'середня ціна покупки',   ru: 'средняя цена покупки', en: 'average purchase price' },
   'stats.avgSaving': { uk: 'середня економія клієнта', ru: 'средняя экономия клиента', en: 'average client saving' },
 
+  // Цифры профиля Larus Logistics: подписи к позициям их прайса
+  'stats.deliveryLviv': {
+    uk: 'доставка до Львова, від',
+    ru: 'доставка до Львова, от',
+    en: 'delivery to Lviv, from',
+  },
+  'stats.insurance': {
+    uk: 'страхування вантажу від вартості',
+    ru: 'страхование груза от стоимости',
+    en: 'cargo insurance of the value',
+  },
+  'stats.broker': {
+    uk: 'брокерські послуги, від',
+    ru: 'брокерские услуги, от',
+    en: 'broker services, from',
+  },
+
   'trust.title': { uk: 'Працюємо напряму з майданчиками:', ru: 'Работаем напрямую с площадками:', en: 'We work directly with:' },
 
   // ── Услуги ────────────────────────────────────────────────────────────────
@@ -188,6 +205,58 @@ export const dict = {
     uk: 'Порівняно з українськими цінами економія вийшла 32 %. Для мене це вирішило все.',
     ru: 'По сравнению с украинскими ценами экономия вышла 32 %. Для меня это решило всё.',
     en: 'Compared with Ukrainian prices I saved 32%. That settled it for me.',
+  },
+
+  // Имена авторов отзывов. У WestAuto они намеренно одинаковы во всех трёх
+  // языках: так было до появления профилей, и менять выдачу живого сайта
+  // ради единообразия незачем
+  'review.name.igor':      { uk: 'Ігор',      ru: 'Ігор',      en: 'Ігор' },
+  'review.name.oleksandr': { uk: 'Олександр', ru: 'Олександр', en: 'Олександр' },
+  'review.name.vitalii':   { uk: 'Віталій',   ru: 'Віталій',   en: 'Віталій' },
+  'review.name.olena':     { uk: 'Олена',     ru: 'Олена',     en: 'Олена' },
+
+  'review.name.larusKyiv':   { uk: 'Олександр', ru: 'Александр', en: 'Oleksandr' },
+  'review.name.larusLviv':   { uk: 'Ірина',     ru: 'Ирина',     en: 'Iryna' },
+  'review.name.larusDealer': { uk: 'Автосалон', ru: 'Автосалон', en: 'Car dealership' },
+
+  // Подписи под именем автора отзыва. У WestAuto это модель авто — одна и та
+  // же во всех трёх языках, но ключом, а не строкой: у других клиентов в этом
+  // месте стоит город и тип покупателя, и их уже надо переводить
+  'review.who.igor':      { uk: 'VW Passat',    ru: 'VW Passat',    en: 'VW Passat' },
+  'review.who.oleksandr': { uk: 'Ford Fusion',  ru: 'Ford Fusion',  en: 'Ford Fusion' },
+  'review.who.vitalii':   { uk: 'Jeep Compass', ru: 'Jeep Compass', en: 'Jeep Compass' },
+  'review.who.olena':     { uk: 'Audi A6',      ru: 'Audi A6',      en: 'Audi A6' },
+
+  // ── Отзывы профиля Larus Logistics — с laruslogistics.com ─────────────────
+  'review.who.larusKyiv': {
+    uk: 'Київ · приватний покупець',
+    ru: 'Киев · частный покупатель',
+    en: 'Kyiv · private buyer',
+  },
+  'review.who.larusLviv': {
+    uk: 'Львів · приватний покупець',
+    ru: 'Львов · частный покупатель',
+    en: 'Lviv · private buyer',
+  },
+  'review.who.larusDealer': {
+    uk: 'Одеса · партнер',
+    ru: 'Одесса · партнёр',
+    en: 'Odesa · partner',
+  },
+  'review.larusKyiv': {
+    uk: 'Авто приїхало за шість тижнів — рівно в строк. Раджу всім, хто бере машину зі США.',
+    ru: 'Авто приехало за шесть недель — ровно в срок. Советую всем, кто берёт машину из США.',
+    en: 'The car arrived in six weeks, right on schedule. I recommend them to anyone buying from the US.',
+  },
+  'review.larusLviv': {
+    uk: 'Усе порахувала сама і бачила кожен етап. Зручно і без зайвих нервів.',
+    ru: 'Всё посчитала сама и видела каждый этап. Удобно и без лишних нервов.',
+    en: 'I worked out the numbers myself and could see every stage. Convenient and stress-free.',
+  },
+  'review.larusDealer': {
+    uk: 'Працюємо разом уже п’ять років — стабільно, без сюрпризів. Для автосалону це головне.',
+    ru: 'Работаем вместе уже пять лет — стабильно, без сюрпризов. Для автосалона это главное.',
+    en: 'We have worked together for five years now — stable, no surprises. For a dealership that is what matters.',
   },
 
   // ── Видео ─────────────────────────────────────────────────────────────────

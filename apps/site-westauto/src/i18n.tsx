@@ -6,7 +6,7 @@ import {
   pathForLocale,
   type Locale,
 } from '@avtoklyuch/shared';
-import { dict, type DictKey } from './content/dict';
+import { texts, type DictKey } from './content/texts';
 
 interface I18nValue {
   locale: Locale;
@@ -19,7 +19,7 @@ interface I18nValue {
 
 const I18nContext = createContext<I18nValue>({
   locale: DEFAULT_LOCALE,
-  t: makeT(dict, DEFAULT_LOCALE),
+  t: makeT(texts, DEFAULT_LOCALE),
   href: (path) => path,
   tag: LOCALE_TAGS[DEFAULT_LOCALE],
 });
@@ -27,7 +27,7 @@ const I18nContext = createContext<I18nValue>({
 export function I18nProvider({ locale, children }: { locale: Locale; children: ReactNode }) {
   const value: I18nValue = {
     locale,
-    t: makeT(dict, locale),
+    t: makeT(texts, locale),
     href: (path) => pathForLocale(path, locale),
     tag: LOCALE_TAGS[locale],
   };

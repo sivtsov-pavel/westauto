@@ -1,45 +1,24 @@
 /* ───────────────────────────────────────────────────────────────────────────
-   WestAuto — публічний сайт.
+   Публічний сайт — спільні стилі для всіх екземплярів.
 
-   Палітра знята з логотипу клієнта: глибокий флотський синій зі щита і
-   червоний зі слова WEST AUTO. Це класична американська автомобільна пара,
-   і саме вона робить сайт впізнаваним без жодного пояснення.
+   Кольори і шрифти тут не задаються. Їх приносить профіль бренду змінними
+   на :root (див. src/content/brands/ і компонент BrandTheme): один образ
+   обслуговує різних клієнтів, і копія палітри в цьому файлі неминуче
+   розійшлася б з профілем — половина сайту залишилася б у чужих кольорах.
 
-   Червоний тут — рідкість: головні дії, ключові цифри, акценти. Синій несе
-   основну масу. Пісочний фон замість чисто білого прибирає «дешеву» яскравість
-   і дає відчуття дорогого паперу.
+   Тому всі звернення до кольору — тільки через var(). Нижче лишилося те, що
+   від бренду не залежить: сітка, радіуси, рецепти тіней.
    ─────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* ── Бренд ─────────────────────────────────────────────────────────────── */
-  --navy: #1f425e;
-  --navy-deep: #13293c;
-  --navy-soft: #35607f;
-  --red: #e22131;
-  --red-deep: #b8121f;
-
-  /* ── Поверхні ──────────────────────────────────────────────────────────── */
-  --paper: #f7f6f3;
-  --card: #ffffff;
-  --sand: #efece6;
-  --ink: #14202b;
-  --ink-soft: #5b6b78;
-  --ink-faint: #8a98a3;
-  --line: #e0dcd4;
-  --line-strong: #cdc7bc;
-
-  /* ── Типографіка ───────────────────────────────────────────────────────── */
-  --display: 'Playfair Display', 'Instrument Serif', Georgia, serif;
-  --sans: 'Manrope', system-ui, -apple-system, sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, monospace;
-
   --gutter: clamp(20px, 6vw, 88px);
   --radius: 14px;
   --radius-lg: 20px;
 
-  --shadow-sm: 0 2px 8px -2px rgba(20, 32, 43, 0.08);
-  --shadow: 0 18px 44px -28px rgba(20, 32, 43, 0.4);
-  --shadow-lg: 0 32px 70px -40px rgba(20, 32, 43, 0.5);
+  /* Тіні беруть канали основного тексту з профілю — звідси var(--ink-rgb) */
+  --shadow-sm: 0 2px 8px -2px rgb(var(--ink-rgb) / 0.08);
+  --shadow: 0 18px 44px -28px rgb(var(--ink-rgb) / 0.4);
+  --shadow-lg: 0 32px 70px -40px rgb(var(--ink-rgb) / 0.5);
 
   color-scheme: light;
 }
@@ -65,12 +44,12 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; line-height: 1.15; }
 p { margin: 0; }
 
 :focus-visible {
-  outline: 2px solid var(--red);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
-::selection { background: var(--navy); color: #fff; }
+::selection { background: var(--brand); color: #fff; }
 
 /* ─── Типографічні класи ───────────────────────────────────────────────── */
 
@@ -94,7 +73,7 @@ p { margin: 0; }
   font-weight: 600;
   letter-spacing: 2.4px;
   text-transform: uppercase;
-  color: var(--red);
+  color: var(--accent);
 }
 
 .lead {
@@ -109,7 +88,7 @@ p { margin: 0; }
   display: block;
   width: 56px;
   height: 3px;
-  background: var(--red);
+  background: var(--accent);
   margin-top: 18px;
   border-radius: 2px;
 }
@@ -118,8 +97,8 @@ p { margin: 0; }
 
 .section { padding: clamp(56px, 7.5vw, 116px) var(--gutter); }
 .section-sand { background: var(--sand); }
-.section-navy { background: var(--navy-deep); color: #eef2f5; }
-.section-navy .muted { color: #9fb2c0; }
+.section-navy { background: var(--brand-deep); color: var(--on-dark); }
+.section-navy .muted { color: var(--on-dark-soft); }
 .section-navy .h2, .section-navy .h3 { color: #fff; }
 
 .wrap { max-width: 1280px; margin: 0 auto; }
@@ -169,17 +148,17 @@ p { margin: 0; }
 .btn:active { transform: translateY(0); }
 
 .btn-red {
-  background: var(--red);
+  background: var(--accent);
   color: #fff;
-  box-shadow: 0 10px 24px -12px rgba(226, 33, 49, 0.7);
+  box-shadow: 0 10px 24px -12px rgb(var(--accent-rgb) / 0.7);
 }
-.btn-red:hover { background: var(--red-deep); box-shadow: 0 14px 30px -12px rgba(226, 33, 49, 0.8); }
+.btn-red:hover { background: var(--accent-deep); box-shadow: 0 14px 30px -12px rgb(var(--accent-rgb) / 0.8); }
 
-.btn-navy { background: var(--navy); color: #fff; }
-.btn-navy:hover { background: var(--navy-deep); }
+.btn-navy { background: var(--brand); color: #fff; }
+.btn-navy:hover { background: var(--brand-deep); }
 
 .btn-outline { border-color: var(--line-strong); color: var(--ink); background: transparent; }
-.btn-outline:hover { border-color: var(--navy); color: var(--navy); }
+.btn-outline:hover { border-color: var(--brand); color: var(--brand); }
 
 .section-navy .btn-outline { border-color: rgba(255,255,255,0.28); color: #fff; }
 .section-navy .btn-outline:hover { border-color: #fff; background: rgba(255,255,255,0.08); }
@@ -193,7 +172,7 @@ p { margin: 0; }
   position: sticky;
   top: 0;
   z-index: 60;
-  background: rgba(247, 246, 243, 0.92);
+  background: rgb(var(--paper-rgb) / 0.92);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
 }
@@ -225,7 +204,7 @@ p { margin: 0; }
   transition: color 0.12s ease;
 }
 
-.nav a:hover, .nav a.active { color: var(--navy); }
+.nav a:hover, .nav a.active { color: var(--brand); }
 
 /* Активний пункт підкреслюється червоним — єдиний акцент у навігації */
 .nav a.active::after {
@@ -233,7 +212,7 @@ p { margin: 0; }
   position: absolute;
   left: 0; right: 0; bottom: 0;
   height: 2px;
-  background: var(--red);
+  background: var(--accent);
   border-radius: 2px;
 }
 
@@ -272,7 +251,7 @@ p { margin: 0; }
 
 .lang a + a { border-left: 1px solid var(--line); }
 .lang a:hover { background: var(--sand); color: var(--ink); }
-.lang a[aria-current='true'] { background: var(--navy); color: #fff; }
+.lang a[aria-current='true'] { background: var(--brand); color: #fff; }
 
 /* ─── Хіро ─────────────────────────────────────────────────────────────── */
 
@@ -280,8 +259,8 @@ p { margin: 0; }
   position: relative;
   padding: clamp(48px, 6vw, 96px) var(--gutter) clamp(56px, 7vw, 104px);
   background:
-    radial-gradient(1100px 520px at 88% -10%, rgba(31, 66, 94, 0.09), transparent 62%),
-    radial-gradient(760px 400px at -8% 110%, rgba(226, 33, 49, 0.06), transparent 60%);
+    radial-gradient(1100px 520px at 88% -10%, rgb(var(--brand-rgb) / 0.09), transparent 62%),
+    radial-gradient(760px 400px at -8% 110%, rgb(var(--accent-rgb) / 0.06), transparent 60%);
   overflow: hidden;
 }
 
@@ -295,7 +274,7 @@ p { margin: 0; }
 }
 
 .hero h1 { font-size: clamp(34px, 5vw, 62px); }
-.hero h1 em { font-style: normal; color: var(--red); }
+.hero h1 em { font-style: normal; color: var(--accent); }
 
 .hero-badges { display: flex; gap: 10px; flex-wrap: wrap; }
 
@@ -313,7 +292,7 @@ p { margin: 0; }
   box-shadow: var(--shadow-sm);
 }
 
-.badge-red { background: rgba(226,33,49,0.08); border-color: rgba(226,33,49,0.2); color: var(--red-deep); }
+.badge-red { background: rgb(var(--accent-rgb) / 0.08); border-color: rgb(var(--accent-rgb) / 0.2); color: var(--accent-deep); }
 
 /* ─── Картка розрахунку в хіро ─────────────────────────────────────────── */
 
@@ -353,7 +332,7 @@ p { margin: 0; }
   justify-content: space-between;
   gap: 16px;
   padding-top: 16px;
-  border-top: 2px solid var(--navy);
+  border-top: 2px solid var(--brand);
   margin-top: 4px;
 }
 
@@ -361,7 +340,7 @@ p { margin: 0; }
   font-family: var(--mono);
   font-size: clamp(26px, 3vw, 34px);
   font-weight: 700;
-  color: var(--navy);
+  color: var(--brand);
 }
 
 /* ─── Смуга статистики ─────────────────────────────────────────────────── */
@@ -388,11 +367,11 @@ p { margin: 0; }
   font-family: var(--display);
   font-size: clamp(32px, 3.6vw, 46px);
   font-weight: 700;
-  color: var(--navy);
+  color: var(--brand);
   line-height: 1;
 }
 
-.stat-value span { color: var(--red); }
+.stat-value span { color: var(--accent); }
 
 .stat-label { font-size: 14px; color: var(--ink-soft); }
 
@@ -419,7 +398,7 @@ p { margin: 0; }
   font-weight: 700;
   font-size: 17px;
   letter-spacing: 0.06em;
-  color: var(--navy);
+  color: var(--brand);
   opacity: 0.6;
 }
 
@@ -454,8 +433,8 @@ p { margin: 0; }
   width: 46px; height: 46px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 12px;
-  background: rgba(31, 66, 94, 0.07);
-  color: var(--navy);
+  background: rgb(var(--brand-rgb) / 0.07);
+  color: var(--brand);
 }
 
 .service h3 { font-size: 17px; font-weight: 600; }
@@ -464,7 +443,10 @@ p { margin: 0; }
 
 .steps {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  /* Мінімум колонки задає компонент під кількість етапів — див. stepTrackMin
+     у Home.tsx. Запасні 230px — рівно те значення, що стояло тут до появи
+     профілів: з ним десять етапів WestAuto лягають як і раніше */
+  grid-template-columns: repeat(auto-fit, minmax(var(--step-min, 230px), 1fr));
   gap: 1px;
   background: rgba(255,255,255,0.12);
   border: 1px solid rgba(255,255,255,0.12);
@@ -473,7 +455,7 @@ p { margin: 0; }
 }
 
 .step {
-  background: var(--navy-deep);
+  background: var(--brand-deep);
   padding: 26px 24px;
   display: flex;
   flex-direction: column;
@@ -481,18 +463,18 @@ p { margin: 0; }
   transition: background 0.16s ease;
 }
 
-.step:hover { background: #17334a; }
+.step:hover { background: var(--brand-raise); }
 
 .step-num {
   font-family: var(--mono);
   font-size: 12px;
   font-weight: 600;
-  color: var(--red);
+  color: var(--accent);
   letter-spacing: 0.1em;
 }
 
 .step h3 { font-size: 15.5px; font-weight: 700; letter-spacing: 0.02em; }
-.step p { font-size: 13.5px; color: #9fb2c0; line-height: 1.6; }
+.step p { font-size: 13.5px; color: var(--on-dark-soft); line-height: 1.6; }
 
 /* ─── Картки авто ──────────────────────────────────────────────────────── */
 
@@ -516,7 +498,7 @@ p { margin: 0; }
 
 .car-photo {
   aspect-ratio: 4 / 3;
-  background: linear-gradient(140deg, #e7e3db, #f3f1ec);
+  background: linear-gradient(140deg, var(--sand-deep), var(--sand-tint));
   position: relative;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
@@ -538,12 +520,12 @@ p { margin: 0; }
   font-weight: 700;
   padding: 6px 11px;
   border-radius: 999px;
-  background: var(--navy);
+  background: var(--brand);
   color: #fff;
   letter-spacing: 0.02em;
 }
 
-.car-status.auction { background: var(--red); }
+.car-status.auction { background: var(--accent); }
 .car-status.delivered { background: #3f7d63; }
 
 .car-body {
@@ -585,7 +567,7 @@ p { margin: 0; }
   font-family: var(--mono);
   font-size: 22px;
   font-weight: 700;
-  color: var(--navy);
+  color: var(--brand);
 }
 
 /* ─── Відгуки ──────────────────────────────────────────────────────────── */
@@ -632,7 +614,7 @@ p { margin: 0; }
 .review-avatar {
   width: 40px; height: 40px;
   border-radius: 50%;
-  background: var(--navy);
+  background: var(--brand);
   color: #fff;
   display: flex; align-items: center; justify-content: center;
   font-weight: 700;
@@ -660,7 +642,7 @@ p { margin: 0; }
 .video-frame {
   aspect-ratio: 16 / 9;
   position: relative;
-  background: #0e1a24;
+  background: var(--brand-darkest);
   display: block;
   overflow: hidden;
 }
@@ -685,7 +667,7 @@ p { margin: 0; }
 .video-play span {
   width: 62px; height: 62px;
   border-radius: 50%;
-  background: var(--red);
+  background: var(--accent);
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 10px 30px -8px rgba(0,0,0,0.6);
   transition: transform 0.16s ease;
@@ -731,7 +713,7 @@ p { margin: 0; }
   padding-top: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--red);
+  color: var(--accent);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -775,7 +757,7 @@ p { margin: 0; }
   text-align: left;
 }
 
-.prose th { font-weight: 700; color: var(--navy); background: var(--sand); }
+.prose th { font-weight: 700; color: var(--brand); background: var(--sand); }
 
 .prose-scroll { overflow-x: auto; }
 
@@ -800,7 +782,7 @@ p { margin: 0; }
   transition: border-color 0.12s ease;
 }
 
-.lead-form input:focus, .lead-form textarea:focus { border-color: var(--navy); }
+.lead-form input:focus, .lead-form textarea:focus { border-color: var(--brand); }
 .lead-form input::placeholder, .lead-form textarea::placeholder { color: var(--ink-faint); }
 
 .section-navy .lead-form input,
@@ -811,7 +793,7 @@ p { margin: 0; }
 }
 
 .section-navy .lead-form input::placeholder,
-.section-navy .lead-form textarea::placeholder { color: #7d93a4; }
+.section-navy .lead-form textarea::placeholder { color: var(--on-dark-faint); }
 
 .notice {
   padding: 16px 18px;
@@ -825,14 +807,14 @@ p { margin: 0; }
 .section-navy .notice {
   background: rgba(255,255,255,0.07);
   border-color: rgba(255,255,255,0.14);
-  color: #cfdae2;
+  color: var(--on-dark-mid);
 }
 
 /* ─── Підвал ───────────────────────────────────────────────────────────── */
 
 .footer {
-  background: var(--navy-deep);
-  color: #cfdae2;
+  background: var(--brand-deep);
+  color: var(--on-dark-mid);
   padding: clamp(48px, 6vw, 84px) var(--gutter) 32px;
 }
 
@@ -861,10 +843,15 @@ p { margin: 0; }
   margin-bottom: 6px;
 }
 
-.footer-col a, .footer-col span { font-size: 14.5px; color: #9fb2c0; transition: color 0.12s ease; }
+.footer-col a, .footer-col span { font-size: 14.5px; color: var(--on-dark-soft); transition: color 0.12s ease; }
 .footer-col a:hover { color: #fff; }
 
 .footer-logo img { height: 46px; width: auto; }
+
+/* Світлої версії логотипа у клієнта може не бути. brightness(0) спершу гасить
+   напівтони, інверсія після цього дає чистий білий, а не брудно-сірий. Працює
+   лише з монохромним знаком — тому вмикає його профіль, а не CSS за здогадкою */
+.footer-logo img.invert { filter: brightness(0) invert(1); }
 
 .footer-socials { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
 
@@ -873,11 +860,11 @@ p { margin: 0; }
   border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.16);
   display: flex; align-items: center; justify-content: center;
-  color: #9fb2c0;
+  color: var(--on-dark-soft);
   transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
 }
 
-.social:hover { background: var(--red); border-color: var(--red); color: #fff; }
+.social:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
 
 .footer-bottom {
   padding-top: 26px;
@@ -887,7 +874,7 @@ p { margin: 0; }
   gap: 18px;
   flex-wrap: wrap;
   font-size: 13px;
-  color: #7d93a4;
+  color: var(--on-dark-faint);
 }
 
 /* ─── Вхід до системи ──────────────────────────────────────────────────── */
@@ -911,7 +898,7 @@ p { margin: 0; }
   padding: 11px 16px;
   border-radius: 9px;
   border: 1px solid rgba(255,255,255,0.18);
-  color: #cfdae2;
+  color: var(--on-dark-mid);
   transition: background 0.14s ease, color 0.14s ease;
 }
 
@@ -1020,7 +1007,7 @@ p { margin: 0; }
 }
 
 .pubcalc-field input:focus,
-.pubcalc-field select:focus { border-color: var(--navy); }
+.pubcalc-field select:focus { border-color: var(--brand); }
 
 .pubcalc-grid {
   display: grid;
@@ -1046,7 +1033,7 @@ p { margin: 0; }
   padding: 10px 0;
   font-size: 24px;
   font-weight: 700;
-  color: var(--navy);
+  color: var(--brand);
   background: transparent;
 }
 
@@ -1068,16 +1055,16 @@ p { margin: 0; }
   appearance: none;
   width: 22px; height: 22px;
   border-radius: 50%;
-  background: var(--red);
+  background: var(--accent);
   border: 3px solid var(--card);
-  box-shadow: 0 2px 8px -1px rgba(226,33,49,0.6);
+  box-shadow: 0 2px 8px -1px rgb(var(--accent-rgb) / 0.6);
   cursor: pointer;
 }
 
 .pubcalc-range::-moz-range-thumb {
   width: 22px; height: 22px;
   border-radius: 50%;
-  background: var(--red);
+  background: var(--accent);
   border: 3px solid var(--card);
   cursor: pointer;
 }
@@ -1113,11 +1100,11 @@ p { margin: 0; }
     gap: 10px;
     padding: 15px;
     border-radius: 12px;
-    background: var(--red);
+    background: var(--accent);
     color: #fff;
     font-weight: 700;
     font-size: 15.5px;
-    box-shadow: 0 12px 30px -10px rgba(226,33,49,0.7);
+    box-shadow: 0 12px 30px -10px rgb(var(--accent-rgb) / 0.7);
   }
   .footer { padding-bottom: 96px; }
 }
@@ -1137,7 +1124,7 @@ p { margin: 0; }
   padding: 14px 18px;
   background: var(--card);
   border: 1px solid var(--line);
-  border-left: 3px solid var(--red);
+  border-left: 3px solid var(--accent);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
   margin-top: 6px;
@@ -1146,7 +1133,7 @@ p { margin: 0; }
 .agent-avatar {
   width: 44px; height: 44px;
   border-radius: 50%;
-  background: var(--navy);
+  background: var(--brand);
   color: #fff;
   display: flex; align-items: center; justify-content: center;
   font-weight: 700;
@@ -1170,7 +1157,7 @@ p { margin: 0; }
   gap: 7px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--navy);
+  color: var(--brand);
   padding: 9px 14px;
   border-radius: 9px;
   border: 1px solid var(--line-strong);
@@ -1178,7 +1165,7 @@ p { margin: 0; }
   transition: background 0.12s ease, color 0.12s ease;
 }
 
-.agent-link:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+.agent-link:hover { background: var(--brand); color: #fff; border-color: var(--brand); }
 
 /* ─── Шапка на вузьких екранах ─────────────────────────────────────────── */
 
@@ -1232,7 +1219,7 @@ p { margin: 0; }
   transition: color 0.12s ease, border-color 0.12s ease;
 }
 
-.staff-link:hover { color: var(--navy); border-color: var(--navy); }
+.staff-link:hover { color: var(--brand); border-color: var(--brand); }
 
 /* Логотип у підвалі: на темному тлі дрібний знак просто зникає */
 .footer-logo img { height: 56px; width: auto; }

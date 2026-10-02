@@ -1,4 +1,5 @@
 import type { Locale } from '@avtoklyuch/shared';
+import { ARTICLE_SLUGS } from './brand';
 
 /**
  * Материалы раздела «Полезное».
@@ -26,7 +27,7 @@ export interface Article {
   blocks: Block[];
 }
 
-export const ARTICLES: Article[] = [
+const ALL_ARTICLES: Article[] = [
   // ─────────────────────────────────────────────────────────────────────────
   {
     slug: 'rozmytnennia-avto-zi-ssha-2026',
@@ -415,6 +416,25 @@ export const ARTICLES: Article[] = [
     ],
   },
 ];
+
+/**
+ * Материалы этого экземпляра — в том порядке, в каком их перечислил профиль.
+ *
+ * Корпус общий, показываем из него не всё: тема, к работе клиента отношения
+ * не имеющая, выдаёт пересаженный сайт быстрее любой другой мелочи. Фильтр
+ * стоит здесь, а не в вёрстке, чтобы невошедшая статья пропала и из списков,
+ * и по прямой ссылке: isMissingPage спрашивает findArticle и отвечает 404.
+ */
+export const ARTICLES: Article[] = ARTICLE_SLUGS.flatMap((slug) => {
+  const article = ALL_ARTICLES.find((a) => a.slug === slug);
+  if (!article) {
+    // Опечатка в профиле не должна ронять сайт, но и молчать о ней нельзя:
+    // статья просто исчезла бы, и заметили бы это нескоро
+    console.warn(`[articles] в профиле указана неизвестная статья «${slug}»`);
+    return [];
+  }
+  return [article];
+});
 
 export function findArticle(slug: string): Article | null {
   return ARTICLES.find((a) => a.slug === slug) ?? null;

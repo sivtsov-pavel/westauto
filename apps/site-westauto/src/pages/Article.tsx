@@ -51,7 +51,7 @@ export function Article() {
         <div className="wrap" style={{ maxWidth: 820 }}>
           <div className="stack" style={{ gap: 18, textAlign: 'center', alignItems: 'center' }}>
             <h2 className="display h2">{t('lead.title')}</h2>
-            <p className="lead" style={{ color: '#9fb2c0', maxWidth: 580 }}>{t('lead.lead')}</p>
+            <p className="lead" style={{ color: 'var(--on-dark-soft)', maxWidth: 580 }}>{t('lead.lead')}</p>
             <div style={{ width: '100%', marginTop: 8 }}>
               <LeadForm source={`article:${article.slug}`} />
             </div>
