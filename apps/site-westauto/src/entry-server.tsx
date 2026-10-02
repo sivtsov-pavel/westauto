@@ -7,35 +7,56 @@ import { findArticle } from './content/articles';
 import { I18nProvider } from './i18n';
 import { metaForRoute, type PageMeta } from './meta';
 import { matchRoutePath } from './routes';
+import { resolveVariant, SiteVariantProvider } from './site-variant';
 import { SsrProvider, type SsrPayload } from './ssr-data';
 
+/**
+ * Отрисовка страницы на сервере.
+ *
+ * `variant` — версия сайта, которую сервер снял с хоста запроса («partners»
+ * для поддомена partners.*). Параметром, а не переменной окружения: один
+ * процесс обслуживает оба адреса сразу, и переменная означала бы, что первый
+ * запрос решает, что увидят остальные.
+ */
 export function render(
   url: string,
   data: SsrPayload,
+  variant?: string | null,
 ): { html: string; meta: PageMeta; locale: Locale } {
   const pathname = new URL(url, 'http://localhost').pathname;
   const { locale, rest } = localeFromPath(pathname);
+  const site = resolveVariant(variant);
 
   const html = renderToString(
     <StrictMode>
       <I18nProvider locale={locale}>
-        <SsrProvider value={data}>
-          <StaticRouter location={url}>
-            <App />
-          </StaticRouter>
-        </SsrProvider>
+        <SiteVariantProvider value={site}>
+          <SsrProvider value={data}>
+            <StaticRouter location={url}>
+              <App />
+            </StaticRouter>
+          </SsrProvider>
+        </SiteVariantProvider>
       </I18nProvider>
     </StrictMode>,
   );
 
-  return { html, meta: metaForRoute(rest, locale, data[rest]), locale };
+  return { html, meta: metaForRoute(rest, locale, data[rest], site), locale };
 }
 
 /** Какие данные нужны маршруту. Ключ — путь без языкового префикса. */
-export function routeDataRequests(pathname: string): { key: string; apiPath: string } | null {
+export function routeDataRequests(
+  pathname: string,
+  variant?: string | null,
+): { key: string; apiPath: string } | null {
   const { rest } = localeFromPath(pathname);
 
-  if (rest === '/') return { key: '/', apiPath: '/api/public/showcase?limit=8' };
+  // На поддомене партнёров в корне стоит своя страница, витрины там нет —
+  // незачем ходить в API и ждать его на каждый заход
+  if (rest === '/') {
+    if (resolveVariant(variant) === 'partners') return null;
+    return { key: '/', apiPath: '/api/public/showcase?limit=8' };
+  }
   if (rest === '/auto') return { key: '/auto', apiPath: '/api/public/showcase?limit=60' };
 
   if (rest.startsWith('/auto/')) {

@@ -1,10 +1,23 @@
 import { useState, type FormEvent } from 'react';
+import type { DictKey } from '@/content/texts';
 import { useI18n } from '@/i18n';
 
 interface LeadFormProps {
   showcaseItemId?: string | null;
   source?: string;
   compact?: boolean;
+  /**
+   * Подпись поля «город». Задана — поле показывается, пусто — его нет вовсе.
+   *
+   * Отдельного столбца под город в заявке нет, и трогать API ради одной
+   * страницы не стоит: город уходит первой строкой комментария, подписанный
+   * тем же словом, которое видел человек. Менеджер читает заявку глазами —
+   * ему важно, чтобы город был, а не в какой он колонке.
+   */
+  cityKey?: DictKey;
+  /** Подпись большого поля: у заявки с главной и у заявки партнёра она разная. */
+  commentKey?: DictKey;
+  submitKey?: DictKey;
 }
 
 /**
@@ -23,16 +36,28 @@ function readRef(): string | null {
   }
 }
 
-export function LeadForm({ showcaseItemId = null, source = 'westauto', compact = false }: LeadFormProps) {
+export function LeadForm({
+  showcaseItemId = null,
+  source = 'westauto',
+  compact = false,
+  cityKey,
+  commentKey = 'lead.comment',
+  submitKey = 'lead.submit',
+}: LeadFormProps) {
   const { t } = useI18n();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [city, setCity] = useState('');
   const [comment, setComment] = useState('');
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setState('sending');
+    // Город — первой строкой комментария, отдельного поля под него в заявке нет
+    const note = [cityKey && city.trim() ? `${t(cityKey)}: ${city.trim()}` : '', comment.trim()]
+      .filter(Boolean)
+      .join('\n');
     try {
       const response = await fetch('/api/public/leads', {
         method: 'POST',
@@ -40,7 +65,7 @@ export function LeadForm({ showcaseItemId = null, source = 'westauto', compact =
         body: JSON.stringify({
           name,
           phone,
-          comment: comment || null,
+          comment: note || null,
           showcaseItemId,
           source: `westauto:${source}`,
           // Метка агента: клиент по его ссылке закрепляется за ним
@@ -51,6 +76,7 @@ export function LeadForm({ showcaseItemId = null, source = 'westauto', compact =
       setState('sent');
       setName('');
       setPhone('');
+      setCity('');
       setComment('');
     } catch {
       setState('error');
@@ -89,20 +115,35 @@ export function LeadForm({ showcaseItemId = null, source = 'westauto', compact =
         />
       </label>
 
+      {cityKey ? (
+        <label>
+          <span className="sr-only">{t(cityKey)}</span>
+          <input
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder={t(cityKey)}
+            autoComplete="address-level2"
+            required
+            minLength={2}
+          />
+        </label>
+      ) : null}
+
       {!compact && (
         <label style={{ gridColumn: '1 / -1' }}>
-          <span className="sr-only">{t('lead.comment')}</span>
+          <span className="sr-only">{t(commentKey)}</span>
           <textarea
             rows={2}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder={t('lead.comment')}
+            placeholder={t(commentKey)}
           />
         </label>
       )}
 
       <button type="submit" className="btn btn-red" disabled={state === 'sending'}>
-        {state === 'sending' ? t('lead.sending') : t('lead.submit')}
+        {state === 'sending' ? t('lead.sending') : t(submitKey)}
       </button>
 
       {state === 'error' && (

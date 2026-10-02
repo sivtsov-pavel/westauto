@@ -57,7 +57,7 @@ const MIME: Record<string, string> = {
 };
 
 interface SsrModule {
-  render: (url: string, data: Record<string, unknown>) => {
+  render: (url: string, data: Record<string, unknown>, variant?: string | null) => {
     html: string;
     locale: Locale;
     meta: {
@@ -68,7 +68,10 @@ interface SsrModule {
       alternates: { locale: Locale; path: string }[];
     };
   };
-  routeDataRequests: (pathname: string) => { key: string; apiPath: string } | null;
+  routeDataRequests: (
+    pathname: string,
+    variant?: string | null,
+  ) => { key: string; apiPath: string } | null;
   isMissingPage: (pathname: string) => boolean;
 }
 
@@ -169,7 +172,11 @@ async function handle(
     return { status: 404, headers: { 'Content-Type': 'text/plain' }, body: 'Not found' };
   }
 
-  const request = ssr.routeDataRequests(pathname);
+  // Версия сайта — из хоста запроса: partners.<домен> отдаёт в корне
+  // партнёрскую страницу, сам домен — прежнюю главную
+  const variant = siteVariant(host);
+
+  const request = ssr.routeDataRequests(pathname, variant);
   const data: Record<string, unknown> = {};
   // Несуществующий маршрут и пропавшая статья видны сразу, без похода в API
   let notFound = ssr.isMissingPage(pathname);
@@ -190,7 +197,7 @@ async function handle(
     }
   }
 
-  const { html, meta, locale } = ssr.render(url, data);
+  const { html, meta, locale } = ssr.render(url, data, variant);
   const origin = buildOrigin(host);
 
   // Мова, якій відвідувач надає перевагу — підказка, а не примус:
@@ -253,6 +260,12 @@ async function handle(
         // serialize, а не голый JSON.stringify: он же гасит «<» и разделители
         // строк, которые внутри <script> сломали бы разбор страницы
         (BRAND_PROFILE ? `;window.__BRAND_PROFILE__=${serialize(BRAND_PROFILE)}` : '') +
+        // Версия сайта — тем же способом, что профиль: заголовка Host в
+        // браузере нет, а гидратация обязана собрать то же дерево, что
+        // пришло с сервера. Впечатывается то, что сказал Host, а показывать
+        // ли по нему партнёрскую страницу, решает resolveVariant — одна
+        // функция на оба конца, поэтому разойтись им нечем
+        (variant ? `;window.__SITE_VARIANT__=${serialize(variant)}` : '') +
         `</script>\n  </head>`,
     );
 
@@ -336,6 +349,25 @@ async function resolveStatic(pathname: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+/**
+ * Какую версию сайта спрашивают — по заголовку Host.
+ *
+ * Роутер проксирует и laruslogistics.seoshkin.tools, и
+ * partners.laruslogistics.seoshkin.tools в один и тот же контейнер, поэтому
+ * отличить адреса можно только здесь. Сравниваем первую метку имени целиком,
+ * а не ищем подстроку: домен вида partners-auto.example поддоменом партнёров
+ * не является, и отдавать ему чужую главную нельзя.
+ *
+ * Возвращается строка-признак, а не готовый тип: решение, показывать ли
+ * партнёрскую страницу этому бренду вообще, принимает site-variant.ts — одно
+ * место и для сервера, и для браузера.
+ */
+function siteVariant(host: string | undefined): string | null {
+  // Host бывает списком при цепочке прокси, и почти всегда с портом
+  const clean = (host ?? '').split(',')[0]!.trim().toLowerCase().split(':')[0] ?? '';
+  return clean.split('.')[0] === 'partners' ? 'partners' : null;
 }
 
 function buildOrigin(host: string | undefined): string {

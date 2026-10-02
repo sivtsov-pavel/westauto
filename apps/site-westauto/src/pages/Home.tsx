@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { formatMoney } from '@avtoklyuch/shared';
 import { CarCard, type CarSummary } from '@/components/CarCard';
@@ -17,6 +17,8 @@ import {
 import { AgentCard } from '@/components/AgentCard';
 import { LeadForm } from '@/components/LeadForm';
 import { PublicCalculator } from '@/components/PublicCalculator';
+import { SectionHead } from '@/components/SectionHead';
+import { Timeline } from '@/components/Timeline';
 import { VideoCard } from '@/components/VideoCard';
 import { ARTICLES } from '@/content/articles';
 import {
@@ -30,7 +32,6 @@ import {
   STEPS_FLOW,
   VIDEOS,
 } from '@/content/brand';
-import type { DictKey } from '@/content/texts';
 import { useI18n } from '@/i18n';
 import { useRouteData } from '@/ssr-data';
 
@@ -79,40 +80,6 @@ function stepTrackMin(count: number): string {
   const columns = [5, 4, 3].find((n) => count % n === 0) ?? 5;
   // 1150 / 5 = 230 — ровно та ширина, что стояла в стилях до профилей
   return `${Math.round(WIDEST_ROW / columns)}px`;
-}
-
-/**
- * Заголовок секции: надзаголовок, заголовок и пояснение.
- *
- * Один компонент на все секции и на обе темы. Темы расходятся только
- * выравниванием и риской под заголовком — это целиком CSS, поэтому разметка
- * здесь общая и у классической вёрстки остаётся прежней.
- */
-function SectionHead({
-  eyebrow,
-  title,
-  lead,
-  leadStyle,
-  aside,
-}: {
-  eyebrow: DictKey;
-  title: DictKey;
-  lead?: DictKey;
-  leadStyle?: CSSProperties;
-  aside?: ReactNode;
-}) {
-  const { t } = useI18n();
-
-  return (
-    <div className="section-head">
-      <div className="stack">
-        <div className="eyebrow">{t(eyebrow)}</div>
-        <h2 className="display h2 rule">{t(title)}</h2>
-        {lead ? <p className="lead" style={leadStyle}>{t(lead)}</p> : null}
-      </div>
-      {aside}
-    </div>
-  );
 }
 
 /**
@@ -232,35 +199,6 @@ function LarusHero({ hero }: { hero: NonNullable<typeof HERO> }) {
         ))}
       </div>
     </section>
-  );
-}
-
-/**
- * Этапы доставки горизонтальным таймлайном — главный приём темы larus.
- *
- * Кружки с номерами соединены линией, последний шаг — зелёный с галочкой
- * вместо цифры: дорога закончилась. На узком экране линия становится
- * вертикальной (см. медиазапрос в site.css), а не ломается посередине.
- */
-function Timeline() {
-  const { t } = useI18n();
-  const last = STEPS_FLOW.length - 1;
-
-  return (
-    <ol className="timeline">
-      {STEPS_FLOW.map((step, index) => (
-        <li
-          className={index === last ? 'tl-step tl-step-done' : 'tl-step'}
-          key={step.titleKey}
-        >
-          <span className="tl-dot">
-            {index === last ? <CheckIcon size={18} /> : index + 1}
-          </span>
-          <h3>{t(step.titleKey)}</h3>
-          <p>{t(step.descKey)}</p>
-        </li>
-      ))}
-    </ol>
   );
 }
 
@@ -413,7 +351,7 @@ export function Home() {
               разное число шагов, и выпавший из середины этап оставил бы дыру
               в нумерации */}
           {IS_LARUS ? (
-            <Timeline />
+            <Timeline steps={STEPS_FLOW} />
           ) : (
             <div
               className="steps"

@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { localeFromPath } from '@avtoklyuch/shared';
 import { App } from './App';
 import { I18nProvider } from './i18n';
+import { readClientVariant, SiteVariantProvider } from './site-variant';
 import { readClientPayload, SsrProvider } from './ssr-data';
 import './styles/site.css';
 
@@ -15,11 +16,15 @@ const { locale } = localeFromPath(window.location.pathname);
 const tree = (
   <StrictMode>
     <I18nProvider locale={locale}>
-      <SsrProvider value={readClientPayload()}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </SsrProvider>
+      {/* Версию сайта сервер впечатал в <head>: в браузере окружения нет,
+          а гидратация обязана собрать то же дерево, что пришло с сервера */}
+      <SiteVariantProvider value={readClientVariant()}>
+        <SsrProvider value={readClientPayload()}>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </SsrProvider>
+      </SiteVariantProvider>
     </I18nProvider>
   </StrictMode>
 );

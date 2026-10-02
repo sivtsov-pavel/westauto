@@ -3,6 +3,7 @@ import { findArticle } from './content/articles';
 import { BRAND } from './content/brand';
 import { texts } from './content/texts';
 import { matchRoutePath } from './routes';
+import type { SiteVariant } from './site-variant';
 
 export interface PageMeta {
   title: string;
@@ -17,7 +18,12 @@ export interface PageMeta {
  * Заголовок и описание страницы считаются одной функцией и на сервере,
  * и в браузере: иначе разметка для поисковика и для человека расходятся.
  */
-export function metaForRoute(path: string, locale: Locale, data: unknown): PageMeta {
+export function metaForRoute(
+  path: string,
+  locale: Locale,
+  data: unknown,
+  variant: SiteVariant = 'main',
+): PageMeta {
   const alternates = (['uk', 'ru', 'en'] as Locale[]).map((code) => ({
     locale: code,
     path: pathForLocale(path, code),
@@ -36,6 +42,15 @@ export function metaForRoute(path: string, locale: Locale, data: unknown): PageM
   // выдаче страницы-призраки не отличить от настоящей главной
   if (!matchRoutePath(path)) {
     return { ...base(`${s('notFound.title')} — ${BRAND.name}`, s('notFound.text')), noindex: true };
+  }
+
+  // Корень поддомена партнёров — своя страница, значит и свой заголовок:
+  // заголовок витрины здесь означал бы две разные страницы под одним именем
+  if (path === '/' && variant === 'partners') {
+    return base(
+      `${s('partners.meta.title')} — ${BRAND.name}`,
+      s('partners.meta.description'),
+    );
   }
 
   if (path === '/auto') {

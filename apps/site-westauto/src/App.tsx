@@ -12,19 +12,29 @@ import { CarDetail } from '@/pages/CarDetail';
 import { Cars } from '@/pages/Cars';
 import { Home } from '@/pages/Home';
 import { NotFound } from '@/pages/NotFound';
+import { Partners } from '@/pages/Partners';
 import { SharedCalculation } from '@/pages/SharedCalculation';
 import { ROUTE_PATHS, type RoutePath } from '@/routes';
+import { useSiteVariant, type SiteVariant } from '@/site-variant';
 
-/** Какая страница за каким маршрутом. Ключи — весь список из routes.ts:
- *  пропустить маршрут или выдумать лишний не даст проверка типов. */
-const PAGES: Record<RoutePath, ReactElement> = {
-  '/': <Home />,
-  '/auto': <Cars />,
-  '/auto/:slug': <CarDetail />,
-  '/blog': <Blog />,
-  '/blog/:slug': <Article />,
-  '/rozrahunok/:token': <SharedCalculation />,
-};
+/**
+ * Какая страница за каким маршрутом. Ключи — весь список из routes.ts:
+ * пропустить маршрут или выдумать лишний не даст проверка типов.
+ *
+ * Корень зависит от версии сайта: на поддомене partners.* главной своего
+ * адреса стоит страница партнёрской программы, а не витрина. Остальные
+ * маршруты там те же — ссылки шапки и подвала обязаны работать.
+ */
+function pagesFor(variant: SiteVariant): Record<RoutePath, ReactElement> {
+  return {
+    '/': variant === 'partners' ? <Partners /> : <Home />,
+    '/auto': <Cars />,
+    '/auto/:slug': <CarDetail />,
+    '/blog': <Blog />,
+    '/blog/:slug': <Article />,
+    '/rozrahunok/:token': <SharedCalculation />,
+  };
+}
 
 /**
  * Маршруты дублируются под префиксами языков.
@@ -33,22 +43,29 @@ const PAGES: Record<RoutePath, ReactElement> = {
  * (/ru/auto, /en/auto). Так канонические адреса основной версии остаются
  * короткими, а у каждого языка свой адрес для поисковика.
  */
-const ROUTES = (
-  <>
-    {ROUTE_PATHS.map((path) =>
-      path === '/' ? (
-        <Route key={path} index element={PAGES[path]} />
-      ) : (
-        <Route key={path} path={path.slice(1)} element={PAGES[path]} />
-      ),
-    )}
-    {/* Несуществующий адрес показывает «страницы нет», а не главную:
-        сервер по этому же признаку отвечает 404 */}
-    <Route path="*" element={<NotFound />} />
-  </>
-);
+function routesFor(variant: SiteVariant) {
+  const pages = pagesFor(variant);
+
+  return (
+    <>
+      {ROUTE_PATHS.map((path) =>
+        path === '/' ? (
+          <Route key={path} index element={pages[path]} />
+        ) : (
+          <Route key={path} path={path.slice(1)} element={pages[path]} />
+        ),
+      )}
+      {/* Несуществующий адрес показывает «страницы нет», а не главную:
+          сервер по этому же признаку отвечает 404 */}
+      <Route path="*" element={<NotFound />} />
+    </>
+  );
+}
 
 export function App() {
+  // Версия сайта пришла из хоста (см. server.ts) — у каждого запроса своя
+  const routes = routesFor(useSiteVariant());
+
   const shell = (
     <>
       {/* Цвета и шрифты бренда — до первой отрисовки, не после */}
@@ -56,9 +73,9 @@ export function App() {
       <Header />
       <main>
         <Routes>
-          <Route path="/">{ROUTES}</Route>
-          <Route path="/ru">{ROUTES}</Route>
-          <Route path="/en">{ROUTES}</Route>
+          <Route path="/">{routes}</Route>
+          <Route path="/ru">{routes}</Route>
+          <Route path="/en">{routes}</Route>
         </Routes>
       </main>
       <Footer />

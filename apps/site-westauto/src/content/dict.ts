@@ -517,6 +517,226 @@ export const dict = {
   'notFound.cars':  { uk: 'Авто у продажу', ru: 'Авто в продаже', en: 'Cars available' },
   'notFound.home':  { uk: 'На головну',     ru: 'На главную',     en: 'Home' },
 
+  // ── Партнерська програма (сторінка на поддомене partners.*) ───────────────
+  // Рисуется только темой larus — см. site-variant.ts. Строки описывают то,
+  // что в системе уже есть: кабинет, калькулятор, расчёт ссылкой, своя
+  // страница, нарисованное вознаграждение и видимые этапы. Ни приложения
+  // партнёра, ни выплат онлайн, ни API здесь нет — и обещать их нельзя.
+  'partners.hero.badge': {
+    uk: 'Партнерська програма',
+    ru: 'Партнёрская программа',
+    en: 'Partner programme',
+  },
+  'partners.hero.title': {
+    uk: 'Ви приводите клієнта — ми привозимо авто',
+    ru: 'Вы приводите клиента — мы привозим авто',
+    en: 'You bring the client — we bring the car',
+  },
+  'partners.hero.lead': {
+    uk: 'Одне авто на місяць чи постійний потік клієнтів — працюємо однаково. Ви отримуєте не відсоток на словах, а готову інфраструктуру: кабінет зі своїми клієнтами, калькулятор, розрахунок для клієнта посиланням і власну сторінку з вашим ім’ям.',
+    ru: 'Одно авто в месяц или постоянный поток клиентов — работаем одинаково. Вы получаете не процент на словах, а готовую инфраструктуру: кабинет со своими клиентами, калькулятор, расчёт для клиента ссылкой и собственную страницу с вашим именем.',
+    en: 'One car a month or a steady flow of clients — the terms are the same. You get working infrastructure, not a verbal percentage: your own dashboard with your clients, a calculator, a shareable quote link and a personal page with your name on it.',
+  },
+  'partners.hero.hint': {
+    uk: 'Винагорода нараховується автоматично, коли угоду закрито',
+    ru: 'Вознаграждение начисляется автоматически, когда сделка закрыта',
+    en: 'Your fee is calculated automatically the moment a deal is won',
+  },
+  'partners.hero.cta': { uk: 'Залишити заявку', ru: 'Оставить заявку', en: 'Apply now' },
+  'partners.hero.cta2': {
+    uk: 'Подивитись систему',
+    ru: 'Посмотреть систему',
+    en: 'See the system',
+  },
+
+  // ── Що отримує партнер ────────────────────────────────────────────────────
+  'partners.tools.eyebrow': {
+    uk: 'Інструменти партнера',
+    ru: 'Инструменты партнёра',
+    en: 'Partner tools',
+  },
+  'partners.tools.title': { uk: 'Що ви отримуєте', ru: 'Что вы получаете', en: 'What you get' },
+  'partners.tools.lead': {
+    uk: 'Усе, щоб вести клієнта самостійно: порахувати, показати цифри, відповісти на «де зараз авто» і побачити свою винагороду.',
+    ru: 'Всё, чтобы вести клиента самостоятельно: посчитать, показать цифры, ответить на «где сейчас авто» и увидеть своё вознаграждение.',
+    en: 'Everything you need to run the client yourself: quote the car, show the numbers, answer "where is it now" and see your own fee.',
+  },
+  'partners.tool.cabinet': { uk: 'Особистий кабінет', ru: 'Личный кабинет', en: 'Your dashboard' },
+  'partners.tool.cabinetD': {
+    uk: 'Ваші клієнти, угоди і винагорода — у розділі «Мій кабінет». Тарифів компанії, маржі й угод інших партнерів ви не бачите — як і вони ваших.',
+    ru: 'Ваши клиенты, сделки и вознаграждение — в разделе «Мой кабинет». Тарифов компании, маржи и сделок других партнёров вы не видите — как и они ваших.',
+    en: 'Your clients, deals and fees live in "My dashboard". You never see company rates, margins or other partners’ deals — and they never see yours.',
+  },
+  'partners.tool.calc': { uk: 'Калькулятор під рукою', ru: 'Калькулятор под рукой', en: 'The calculator' },
+  'partners.tool.calcD': {
+    uk: 'Рахуєте клієнту підсумок самі: ставка, доставка, збори, розмитнення. Цифра не розійдеться з тією, яку назве менеджер — розрахунок один і той самий.',
+    ru: 'Считаете клиенту итог сами: ставка, доставка, сборы, растаможка. Цифра не разойдётся с той, что назовёт менеджер — расчёт один и тот же.',
+    en: 'You quote the client yourself: bid, shipping, fees, customs. The figure cannot differ from the manager’s — it is literally the same calculation.',
+  },
+  'partners.tool.quote': {
+    uk: 'Розрахунок клієнту посиланням',
+    ru: 'Расчёт клиенту ссылкой',
+    en: 'A quote you can send',
+  },
+  'partners.tool.quoteD': {
+    uk: 'Надсилаєте акуратну сторінку з розбивкою по статтях витрат. Закупівельних цін там немає — тільки те, що належить бачити клієнту.',
+    ru: 'Отправляете аккуратную страницу с разбивкой по статьям расходов. Закупочных цен там нет — только то, что положено видеть клиенту.',
+    en: 'Send a clean page with the cost broken down line by line. Purchase prices are not on it — only what the client is meant to see.',
+  },
+  'partners.tool.page': {
+    uk: 'Своя сторінка з вашим ім’ям',
+    ru: 'Своя страница с вашим именем',
+    en: 'Your own page',
+  },
+  'partners.tool.pageD': {
+    uk: 'Окрема адреса, де стоїть карточка «Ваш персональний менеджер» з вашим ім’ям і телефоном. Заявки звідти закріплюються за вами автоматично.',
+    ru: 'Отдельный адрес, где стоит карточка «Ваш персональный менеджер» с вашим именем и телефоном. Заявки оттуда закрепляются за вами автоматически.',
+    en: 'A separate address carrying a "Your personal manager" card with your name and phone. Requests from it are assigned to you automatically.',
+  },
+  'partners.tool.reward': {
+    uk: 'Винагорода нараховується сама',
+    ru: 'Вознаграждение считается само',
+    en: 'The fee counts itself',
+  },
+  'partners.tool.rewardD': {
+    uk: 'Щойно угоду відмічено виграною, винагорода порахована й записана. Нараховане заднім числом не переписується — ні вами, ні нами.',
+    ru: 'Как только сделка отмечена выигранной, вознаграждение посчитано и записано. Начисленное задним числом не переписывается — ни вами, ни нами.',
+    en: 'The moment a deal is marked won, your fee is calculated and recorded. What is already recorded is never rewritten — not by you, not by us.',
+  },
+  'partners.tool.status': { uk: 'Видно кожен етап', ru: 'Виден каждый этап', en: 'Every stage is visible' },
+  'partners.tool.statusD': {
+    uk: 'Аукціон, склад у США, контейнер, порт Клайпеда, митниця, видача. Ви відповідаєте клієнту самі, не передзвонюючи в офіс.',
+    ru: 'Аукцион, склад в США, контейнер, порт Клайпеда, таможня, выдача. Вы отвечаете клиенту сами, не перезванивая в офис.',
+    en: 'Auction, US warehouse, container, port of Klaipeda, customs, handover. You answer the client yourself instead of calling the office back.',
+  },
+  'partners.tool.leads': { uk: 'Заявки не губляться', ru: 'Заявки не теряются', en: 'Nothing gets lost' },
+  'partners.tool.leadsD': {
+    uk: 'Заявка з сайту потрапляє в систему, а не в чиюсь переписку: видно, коли прийшла і що з нею далі.',
+    ru: 'Заявка с сайта попадает в систему, а не в чью-то переписку: видно, когда пришла и что с ней дальше.',
+    en: 'A request from the site lands in the system, not in somebody’s chat: you see when it came in and what happened next.',
+  },
+
+  // ── Як рахується винагорода ───────────────────────────────────────────────
+  'partners.reward.eyebrow': { uk: 'Умови', ru: 'Условия', en: 'Terms' },
+  'partners.reward.title': {
+    uk: 'Як рахується винагорода',
+    ru: 'Как считается вознаграждение',
+    en: 'How your fee is calculated',
+  },
+  'partners.reward.lead': {
+    uk: 'Два варіанти — обираєте той, що вам ближче. Конкретні суми й відсотки обговорюємо індивідуально: вони залежать від того, скільком клієнтам ви возите і хто веде угоду.',
+    ru: 'Два варианта — выбираете тот, что вам ближе. Конкретные суммы и проценты обсуждаем индивидуально: они зависят от того, скольким клиентам вы возите и кто ведёт сделку.',
+    en: 'Two options — you pick the one that suits you. The exact amounts and percentages are agreed individually: they depend on your volume and on who runs the deal.',
+  },
+  'partners.reward.fixed': {
+    uk: 'Фіксована сума за авто',
+    ru: 'Фиксированная сумма за авто',
+    en: 'A fixed amount per car',
+  },
+  'partners.reward.fixedD': {
+    uk: 'Однакова сума за кожне доставлене авто, незалежно від його ціни. Свою винагороду ви знаєте ще до торгів.',
+    ru: 'Одинаковая сумма за каждое доставленное авто, независимо от его цены. Своё вознаграждение вы знаете ещё до торгов.',
+    en: 'The same amount for every delivered car, whatever it costs. You know your fee before the bidding even starts.',
+  },
+  'partners.reward.share': {
+    uk: 'Відсоток від маржі',
+    ru: 'Процент от маржи',
+    en: 'A share of the margin',
+  },
+  'partners.reward.shareD': {
+    uk: 'Частка від заробітку компанії на угоді. Дорожчі й складніші авто приносять більше, ніж фіксована сума.',
+    ru: 'Доля от заработка компании на сделке. Более дорогие и сложные авто приносят больше, чем фиксированная сумма.',
+    en: 'A share of what the company earns on the deal. Pricier, trickier cars pay more than a flat amount would.',
+  },
+  'partners.reward.promo': {
+    uk: 'Умови фіксуємо до першої угоди, а не після неї. Нарахування видно в кабінеті того ж дня.',
+    ru: 'Условия фиксируем до первой сделки, а не после неё. Начисление видно в кабинете в тот же день.',
+    en: 'Terms are fixed before the first deal, not after it. The accrual shows up in your dashboard the same day.',
+  },
+  'partners.reward.promoCta': {
+    uk: 'Обговорити умови',
+    ru: 'Обсудить условия',
+    en: 'Discuss the terms',
+  },
+  'partners.reward.p1': {
+    uk: 'Один розрахунок і для вас, і для клієнта',
+    ru: 'Один расчёт и для вас, и для клиента',
+    en: 'One calculation for you and for the client',
+  },
+  'partners.reward.p2': {
+    uk: 'Кожне нарахування видно в кабінеті',
+    ru: 'Каждое начисление видно в кабинете',
+    en: 'Every accrual is visible in the dashboard',
+  },
+  'partners.reward.p3': {
+    uk: 'Заявки з вашої сторінки закріплені за вами',
+    ru: 'Заявки с вашей страницы закреплены за вами',
+    en: 'Requests from your page stay yours',
+  },
+
+  // ── Як почати ─────────────────────────────────────────────────────────────
+  'partners.start.eyebrow': { uk: 'Початок', ru: 'Начало', en: 'Getting started' },
+  'partners.start.title': { uk: 'Як почати', ru: 'Как начать', en: 'How to start' },
+  'partners.start.lead': {
+    uk: 'Чотири кроки. Без вступних платежів і обов’язкових обсягів.',
+    ru: 'Четыре шага. Без вступительных платежей и обязательных объёмов.',
+    en: 'Four steps. No joining fee, no minimum volume.',
+  },
+  'partners.start.1': { uk: 'Заявка', ru: 'Заявка', en: 'Your request' },
+  'partners.start.1d': {
+    uk: 'Залишаєте ім’я, телефон і пару слів про себе. Відповідаємо в робочий час.',
+    ru: 'Оставляете имя, телефон и пару слов о себе. Отвечаем в рабочее время.',
+    en: 'Leave your name, phone and a couple of words about yourself. We reply during business hours.',
+  },
+  'partners.start.2': { uk: 'Обговорюємо умови', ru: 'Обсуждаем условия', en: 'We agree the terms' },
+  'partners.start.2d': {
+    uk: 'Розповідаєте, скільком клієнтам возите. Обираємо варіант винагороди і фіксуємо його.',
+    ru: 'Рассказываете, скольким клиентам возите. Выбираем вариант вознаграждения и фиксируем его.',
+    en: 'You tell us about your clients. We pick the fee model together and write it down.',
+  },
+  'partners.start.3': {
+    uk: 'Кабінет і своя сторінка',
+    ru: 'Кабинет и своя страница',
+    en: 'Dashboard and your page',
+  },
+  'partners.start.3d': {
+    uk: 'Видаємо доступ до кабінету і піднімаємо вашу сторінку з вашим ім’ям і телефоном.',
+    ru: 'Выдаём доступ в кабинет и поднимаем вашу страницу с вашим именем и телефоном.',
+    en: 'We hand over the dashboard and put up your page with your name and phone on it.',
+  },
+  'partners.start.4': { uk: 'Перша угода', ru: 'Первая сделка', en: 'The first deal' },
+  'partners.start.4d': {
+    uk: 'Рахуєте клієнту авто, доставку ведемо ми. Винагорода нарахується, коли угоду закрито.',
+    ru: 'Считаете клиенту авто, доставку ведём мы. Вознаграждение начислится, когда сделка закрыта.',
+    en: 'You quote the car, we run the delivery. Your fee is accrued once the deal is won.',
+  },
+
+  // ── Заявка партнера ───────────────────────────────────────────────────────
+  'partners.lead.eyebrow': { uk: 'Заявка', ru: 'Заявка', en: 'Apply' },
+  'partners.lead.title': {
+    uk: 'Розкажіть про себе — обговоримо умови',
+    ru: 'Расскажите о себе — обсудим условия',
+    en: 'Tell us about yourself and we will talk terms',
+  },
+  'partners.lead.lead': {
+    uk: 'Відповідаємо в робочий час. На цьому кроці жодних зобов’язань: спершу умови, потім ваше рішення.',
+    ru: 'Отвечаем в рабочее время. На этом шаге никаких обязательств: сначала условия, потом ваше решение.',
+    en: 'We reply during business hours. Nothing is committed at this step: first the terms, then your decision.',
+  },
+  'partners.lead.city': { uk: 'Місто', ru: 'Город', en: 'City' },
+  'partners.lead.about': {
+    uk: 'Пара слів про себе: скільком клієнтам возите, чим займаєтесь',
+    ru: 'Пара слов о себе: скольким клиентам возите, чем занимаетесь',
+    en: 'A couple of words about you: your clients, what you do',
+  },
+  'partners.lead.submit': { uk: 'Надіслати заявку', ru: 'Отправить заявку', en: 'Send request' },
+  'partners.meta.title': { uk: 'Стати партнером', ru: 'Стать партнёром', en: 'Become a partner' },
+  'partners.meta.description': {
+    uk: 'Партнерська програма Larus Logistics: кабінет зі своїми клієнтами, калькулятор, розрахунок клієнту посиланням, власна сторінка з вашим ім’ям і винагорода, що нараховується автоматично.',
+    ru: 'Партнёрская программа Larus Logistics: кабинет со своими клиентами, калькулятор, расчёт клиенту ссылкой, своя страница с вашим именем и вознаграждение, которое начисляется автоматически.',
+    en: 'The Larus Logistics partner programme: your own dashboard, a calculator, shareable quotes, a personal page with your name and a fee that is calculated automatically.',
+  },
+
   // ── Общее ─────────────────────────────────────────────────────────────────
   'common.loading':  { uk: 'Завантаження…', ru: 'Загрузка…',  en: 'Loading…' },
 } satisfies Dict<string>;
