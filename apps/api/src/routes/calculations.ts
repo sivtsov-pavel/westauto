@@ -595,6 +595,12 @@ function mapCalculation(row: Record<string, unknown>) {
       ? null
       : Number(row['commission_usd']),
     agentName: (row['agent_name'] as string | undefined) ?? null,
+    // Выплаченное вознаграждение больше не меняется — интерфейс должен это
+    // показывать, иначе кнопка «выплачено» жмётся второй раз и получает отказ
+    commissionPaidAt:
+      row['commission_paid_at'] == null
+        ? null
+        : (row['commission_paid_at'] as Date).toISOString(),
     costUsd: Number(row['cost_usd']),
     marginUsd: Number(row['margin_usd']),
     clientTotalUsd: Number(row['client_total_usd']),

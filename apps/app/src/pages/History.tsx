@@ -87,6 +87,27 @@ export function History() {
     }
   };
 
+  /**
+   * Закрыть выплату вознаграждения.
+   *
+   * Отдельным действием от самой отметки «выиграна»: между начислением и
+   * выплатой проходит время, и агенту в кабинете важно видеть разницу между
+   * «заработано» и «получено».
+   */
+  const payCommission = async (calc: CalculationRecord) => {
+    setSavingOutcome(true);
+    try {
+      await api.post(`/api/agents/payouts/${calc.id}`, {});
+      setPreview({ ...calc, commissionPaidAt: new Date().toISOString() });
+      await load();
+      toast.success('Вознаграждение отмечено выплаченным');
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : 'Не удалось отметить выплату');
+    } finally {
+      setSavingOutcome(false);
+    }
+  };
+
   // Поиск с задержкой: печатать и ждать ответа на каждую букву неудобно
   useEffect(() => {
     const timer = window.setTimeout(() => void load(), 300);
@@ -291,6 +312,88 @@ export function History() {
             <ClientCard result={preview.result} lot={preview.state.lot} />
 
             <ShareLink calculationId={preview.id} />
+
+            {/*
+              Исход сделки отмечает компания, а не агент: от этой отметки
+              считается его вознаграждение, и считается один раз — поэтому
+              у агента такой кнопки нет вовсе (сервер ему тоже откажет).
+            */}
+            {user?.role !== 'agent' && (
+              <div className="stack" style={{ gap: 8 }}>
+                <div className="section-title">Чем кончилась сделка</div>
+
+                {preview.outcome === null && (
+                  <span className="muted" style={{ fontSize: 12.5 }}>
+                    Пока не отмечено. Система сама не знает, купил человек машину
+                    или передумал — отметьте, когда станет ясно.
+                  </span>
+                )}
+
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className={preview.outcome === 'won' ? 'btn' : 'btn ghost'}
+                    disabled={savingOutcome}
+                    onClick={() => void setOutcome(preview, 'won')}
+                  >
+                    Выиграна
+                  </button>
+                  <button
+                    type="button"
+                    className={preview.outcome === 'lost' ? 'btn' : 'btn ghost'}
+                    disabled={savingOutcome}
+                    onClick={() => void setOutcome(preview, 'lost')}
+                  >
+                    Проиграна
+                  </button>
+                  {preview.outcome !== null && (
+                    <button
+                      type="button"
+                      className="btn ghost"
+                      disabled={savingOutcome}
+                      onClick={() => void setOutcome(preview, null)}
+                    >
+                      Снять отметку
+                    </button>
+                  )}
+                </div>
+
+                {preview.agentName && (
+                  <>
+                    <div className="spread" style={{ fontSize: 13 }}>
+                      <span className="muted">
+                        Вознаграждение агента · {preview.agentName}
+                      </span>
+                      <span className="mono">
+                        {preview.commissionUsd === null
+                          ? '—'
+                          : formatMoney(preview.commissionUsd)}
+                      </span>
+                    </div>
+
+                    {preview.outcome === 'won' &&
+                      preview.commissionUsd !== null &&
+                      preview.commissionUsd > 0 &&
+                      (preview.commissionPaidAt ? (
+                        <span className="muted" style={{ fontSize: 12.5 }}>
+                          Выплачено{' '}
+                          {new Date(preview.commissionPaidAt).toLocaleDateString('ru-RU')}
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn ghost"
+                          disabled={savingOutcome}
+                          style={{ alignSelf: 'flex-start' }}
+                          onClick={() => void payCommission(preview)}
+                        >
+                          Отметить выплату
+                        </button>
+                      ))}
+                  </>
+                )}
+              </div>
+            )}
 
             <div className="stack" style={{ gap: 4 }}>
               <div className="section-title">Полная разбивка · внутренняя</div>

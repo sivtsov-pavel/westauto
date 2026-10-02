@@ -104,6 +104,8 @@ export interface CalculationRecord {
    * переписывать уже начисленное задним числом.
    */
   commissionUsd: number | null;
+  /** Когда вознаграждение выплачено. Выплаченное не пересчитывается. */
+  commissionPaidAt: string | null;
   agentName: string | null;
   costUsd: number;
   marginUsd: number;
