@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { type CalcSettings } from '@avtoklyuch/shared';
+import { can, type CalcSettings } from '@avtoklyuch/shared';
 import { api, ApiError } from '@/api/client';
 import type { LeadRow, UserRow } from '@/api/types';
+import { DemoBadge } from '@/components/DemoBadge';
 import { CheckIcon, PencilIcon, PlusIcon } from '@/components/Icons';
 import { Modal } from '@/components/Modal';
 import { MoneyInput } from '@/components/MoneyInput';
@@ -26,8 +27,13 @@ export function Settings() {
   const toast = useToast();
   const { user } = useAuth();
   const canEdit = user?.role === 'admin';
+  // Видимостью учебных данных распоряжается тот, кто правит настройки.
+  // Проверяем право, а не роль: роли со временем перетасуют, право останется
+  const canManageSettings = user ? can(user.role, 'manageSettings') : false;
 
   const [settings, setSettings] = useState<CalcSettings | null>(null);
+  const [hideDemoData, setHideDemoData] = useState(false);
+  const [demoSaving, setDemoSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -38,10 +44,11 @@ export function Settings() {
   const load = useCallback(async () => {
     try {
       const [s, l] = await Promise.all([
-        api.get<{ settings: CalcSettings }>('/api/settings'),
+        api.get<{ settings: CalcSettings; hideDemoData: boolean }>('/api/settings'),
         api.get<{ items: LeadRow[] }>('/api/leads'),
       ]);
       setSettings(s.settings);
+      setHideDemoData(s.hideDemoData);
       setLeads(l.items);
 
       if (canEdit) {
@@ -100,6 +107,35 @@ export function Settings() {
     }
   }
 
+  /**
+   * Переключатель применяется сразу, а не по кнопке «Сохранить».
+   *
+   * Это не значение расчёта, а вид списков: человек щёлкает и смотрит, что
+   * получилось. Копить такую правку в черновике и забыть нажать сохранение —
+   * самый вероятный сценарий из возможных.
+   */
+  async function toggleDemo(hide: boolean) {
+    setDemoSaving(true);
+    try {
+      const result = await api.patch<{ hideDemoData: boolean }>(
+        '/api/settings/demo-visibility',
+        { hideDemoData: hide },
+      );
+      setHideDemoData(result.hideDemoData);
+      // Списки перечитываются не здесь: пользователь увидит изменение, когда
+      // откроет «Клиентов» или «Сделки» — там данные грузятся при входе
+      toast.success(
+        result.hideDemoData
+          ? 'Учебные записи скрыты. Они остались в базе — ничего не удалено'
+          : 'Учебные записи снова показываются',
+      );
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : 'Не удалось переключить');
+    } finally {
+      setDemoSaving(false);
+    }
+  }
+
   function update(field: keyof CalcSettings, value: number) {
     setSettings((current) => (current ? { ...current, [field]: value } : current));
     setDirty(true);
@@ -141,7 +177,7 @@ export function Settings() {
           </div>
         )}
 
-        <section className="card">
+        <section className="card" data-tour="settings">
           <div className="section-title" style={{ marginBottom: 14 }}>Суммы по умолчанию</div>
           <div className="grid-3">
             {MONEY_FIELDS.map(([field, label, hint]) => (
@@ -184,8 +220,34 @@ export function Settings() {
           </div>
         </section>
 
-        {canEdit && (
+        {canManageSettings && (
           <section className="card">
+            <div className="section-title" style={{ marginBottom: 12 }}>
+              Учебные данные <DemoBadge />
+            </div>
+            <label className="row-flex" style={{ gap: 8, alignItems: 'flex-start' }}>
+              <input
+                type="checkbox"
+                checked={hideDemoData}
+                disabled={demoSaving}
+                onChange={(event) => void toggleDemo(event.target.checked)}
+                style={{ width: 16, height: 16, marginTop: 2 }}
+              />
+              <span className="stack" style={{ gap: 2 }}>
+                <span style={{ fontSize: 13 }}>Скрывать учебные данные</span>
+                <span className="faint" style={{ fontSize: 11.5 }}>
+                  Учебные клиенты, сделки, заявки и расчёты перестанут
+                  показываться в списках и в сводке. Из базы они не удаляются и
+                  вернутся, как только галочку снять, — удалять их нельзя: к
+                  учебному клиенту может быть привязана настоящая сделка.
+                </span>
+              </span>
+            </label>
+          </section>
+        )}
+
+        {canEdit && (
+          <section className="card" data-tour="settings-users">
             <div className="card-head">
               <div className="section-title">Пользователи и роли</div>
               <button
@@ -268,7 +330,12 @@ export function Settings() {
                 {leads.map((lead) => (
                   <tr key={lead.id} style={{ opacity: lead.isProcessed ? 0.5 : 1 }}>
                     <td className="nowrap">{new Date(lead.createdAt).toLocaleString('ru-RU')}</td>
-                    <td>{lead.name}</td>
+                    <td>
+                      <span className="row-flex" style={{ gap: 6 }}>
+                        {lead.name}
+                        {lead.isDemo && <DemoBadge />}
+                      </span>
+                    </td>
                     <td className="mono nowrap">{lead.phone}</td>
                     <td>{lead.itemTitle ?? '—'}</td>
                     <td className="muted">{lead.comment ?? '—'}</td>

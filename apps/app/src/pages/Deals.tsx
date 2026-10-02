@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, ApiError } from '@/api/client';
 import type { ClientRow, DealRow, DealStage } from '@/api/types';
+import { DemoBadge } from '@/components/DemoBadge';
 import { PlusIcon } from '@/components/Icons';
 import { Modal } from '@/components/Modal';
 import { useAuth } from '@/state/auth';
@@ -121,8 +122,11 @@ export function Deals() {
       <div className="page">
         {loading && <div className="empty">Загружаю…</div>}
 
+        {/* data-tour="deals" стоит на всех трёх ветках — доске, таблице и
+            пустом списке: одновременно рисуется только одна из них, и тур
+            находит ту, которая сейчас на экране */}
         {!loading && items.length === 0 && (
-          <div className="card">
+          <div className="card" data-tour="deals">
             <div className="empty">
               Сделок пока нет. Заведите первую — или откройте «Заявки» и
               превратите в сделку обращение с сайта, чтобы не перепечатывать
@@ -180,7 +184,7 @@ function Board({ deals, onOpen }: { deals: DealRow[]; onOpen: (id: string) => vo
   }, [deals]);
 
   return (
-    <div className="deal-board">
+    <div className="deal-board" data-tour="deals">
       {STAGES.map((stage) => {
         const column = byStage.get(stage) ?? [];
         const sum = column.reduce((acc, d) => acc + d.plannedUsd, 0);
@@ -232,6 +236,8 @@ function DealTile({ deal, onOpen }: { deal: DealRow; onOpen: (id: string) => voi
       </div>
       <div className="deal-tile-client">{deal.clientName}</div>
 
+      {deal.isDemo && <DemoBadge />}
+
       {deal.lotNumber && (
         <div className="faint mono" style={{ fontSize: 10.5 }}>лот {deal.lotNumber}</div>
       )}
@@ -261,7 +267,7 @@ function DealTile({ deal, onOpen }: { deal: DealRow; onOpen: (id: string) => voi
 
 function Table({ deals, onOpen }: { deals: DealRow[]; onOpen: (id: string) => void }) {
   return (
-    <section className="card">
+    <section className="card" data-tour="deals">
       <div className="table-scroll">
         <table className="table">
           <thead>
@@ -288,7 +294,10 @@ function Table({ deals, onOpen }: { deals: DealRow[]; onOpen: (id: string) => vo
                   <td className="faint">{shortDate(deal.createdAt)}</td>
                   <td>
                     <div className="stack" style={{ gap: 1 }}>
-                      <span>{deal.clientName}</span>
+                      <span className="row-flex" style={{ gap: 6 }}>
+                        {deal.clientName}
+                        {deal.isDemo && <DemoBadge />}
+                      </span>
                       <span className="faint mono" style={{ fontSize: 11 }}>
                         {deal.clientPhone}
                       </span>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, ApiError } from '@/api/client';
 import type { ClientRow } from '@/api/types';
+import { DemoBadge } from '@/components/DemoBadge';
 import { PlusIcon } from '@/components/Icons';
 import { Modal } from '@/components/Modal';
 import { useAuth } from '@/state/auth';
@@ -102,8 +103,10 @@ export function Clients() {
       <div className="page">
         {loading && <div className="empty">Загружаю…</div>}
 
+        {/* data-tour — и на пустом списке, и на таблице: рисуется
+            одна из двух ветвей, тур подсветит ту, что на экране */}
         {!loading && items.length === 0 && (
-          <div className="card">
+          <div className="card" data-tour="clients">
             <div className="empty">
               Клиентов пока нет. Заявки с сайта попадут сюда сами, а тех, кто
               написал в мессенджер или позвонил, добавьте кнопкой выше —
@@ -113,7 +116,7 @@ export function Clients() {
         )}
 
         {!loading && items.length > 0 && (
-          <section className="card">
+          <section className="card" data-tour="clients">
             <div className="table-scroll">
               <table className="table">
                 <thead>
@@ -133,7 +136,10 @@ export function Clients() {
                     <tr key={client.id}>
                       <td>
                         <div className="stack" style={{ gap: 1 }}>
-                          <span>{client.fullName}</span>
+                          <span className="row-flex" style={{ gap: 6 }}>
+                            {client.fullName}
+                            {client.isDemo && <DemoBadge />}
+                          </span>
                           <span className="faint" style={{ fontSize: 11 }}>
                             с нами {ago(client.createdAt)}
                           </span>

@@ -6,6 +6,7 @@ import type {
   DealDetails,
   DealStage,
 } from '@/api/types';
+import { DemoBadge } from '@/components/DemoBadge';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/state/toast';
 import {
@@ -78,7 +79,10 @@ export function DealCard({ dealId, onClose, onChanged }: Props) {
         {/* ─── Кто и что ─── */}
         <div className="deal-head">
           <div className="stack" style={{ gap: 2, minWidth: 0 }}>
-            <strong style={{ fontSize: 15 }}>{item.clientName}</strong>
+            <span className="row-flex" style={{ gap: 6 }}>
+              <strong style={{ fontSize: 15 }}>{item.clientName}</strong>
+              {item.isDemo && <DemoBadge />}
+            </span>
             <span className="faint mono" style={{ fontSize: 12 }}>{item.clientPhone}</span>
           </div>
           <div className="stack" style={{ gap: 2, textAlign: 'right' }}>

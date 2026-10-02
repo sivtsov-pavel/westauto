@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiError } from '@/api/client';
 import type { ClientRow, LeadRow } from '@/api/types';
+import { DemoBadge } from '@/components/DemoBadge';
 import { Modal } from '@/components/Modal';
 import { DealForm } from './deals/DealForm';
 import { CheckIcon } from '@/components/Icons';
@@ -97,7 +98,12 @@ export function Leads() {
                 {items.map((lead) => (
                   <tr key={lead.id} style={{ opacity: lead.isProcessed ? 0.5 : 1 }}>
                     <td className="nowrap">{new Date(lead.createdAt).toLocaleString('ru-RU')}</td>
-                    <td>{lead.name}</td>
+                    <td>
+                      <span className="row-flex" style={{ gap: 6 }}>
+                        {lead.name}
+                        {lead.isDemo && <DemoBadge />}
+                      </span>
+                    </td>
                     <td className="mono nowrap">
                       <a href={`tel:${lead.phone.replace(/[^\d+]/g, '')}`}>{lead.phone}</a>
                     </td>

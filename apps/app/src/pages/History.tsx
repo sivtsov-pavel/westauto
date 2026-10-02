@@ -4,6 +4,7 @@ import { formatMoney } from '@avtoklyuch/shared';
 import { api, ApiError } from '@/api/client';
 import type { CalculationRecord, CalcState, UserRow } from '@/api/types';
 import { ClientCard } from '@/components/ClientCard';
+import { DemoBadge } from '@/components/DemoBadge';
 import { ShareLink } from '@/components/ShareLink';
 import { CopyIcon, EyeIcon, SearchIcon, TrashIcon } from '@/components/Icons';
 import { Modal } from '@/components/Modal';
@@ -178,7 +179,12 @@ export function History() {
                       {new Date(item.createdAt).toLocaleDateString('ru-RU')}
                     </td>
                     <td className="mono">{item.lotNumber ?? item.vin ?? '—'}</td>
-                    <td>{item.makeModel ?? '—'}</td>
+                    <td>
+                      <span className="row-flex" style={{ gap: 6 }}>
+                        {item.makeModel ?? '—'}
+                        {item.isDemo && <DemoBadge />}
+                      </span>
+                    </td>
                     <td className="nowrap">{item.userName ?? '—'}</td>
                     <td className="mono nowrap">{formatMoney(item.clientTotalUsd)}</td>
                     <td>
