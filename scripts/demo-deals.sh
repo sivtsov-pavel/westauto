@@ -6,6 +6,12 @@
 #   ./scripts/demo-deals.sh apply      — добавить
 #   ./scripts/demo-deals.sh remove     — объяснит, почему больше не удаляет
 #
+# Для экземпляра клиента — его настройками:
+#   ENV_FILE=.env.larus ./scripts/demo-deals.sh apply
+#
+# У каждого экземпляра своя база со своим пользователем, поэтому имена
+# подтягиваются из env-файла, а не зашиты в скрипт.
+#
 # Каждая заведённая запись получает флаг is_demo в базе. Отличить учебное от
 # настоящего теперь может сам запрос, а не человек, читающий заметки, —
 # поэтому учебные данные можно спокойно держать и на боевом стенде: в
@@ -24,7 +30,10 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 MODE="${1:-preview}"
 
-PORT=$(grep -E '^HTTP_PORT=' .env | cut -d= -f2 | tr -d '[:space:]')
+ENV_FILE="${ENV_FILE:-.env}"
+[[ -f "$ENV_FILE" ]] || { echo "Нет файла настроек ${ENV_FILE}"; exit 1; }
+
+PORT=$(grep -E '^HTTP_PORT=' "$ENV_FILE" | cut -d= -f2 | tr -d '[:space:]')
 BASE="http://127.0.0.1:${PORT:-8081}"
 
 # На бою учебные данные появляться сами не должны: даже с флагом is_demo они
@@ -32,7 +41,7 @@ BASE="http://127.0.0.1:${PORT:-8081}"
 # включена. Поэтому запуск на боевой настройке требует явного согласия.
 COMPOSE_FILE="docker-compose.yml"
 IS_PROD=no
-if grep -qE '^NODE_ENV=production' .env; then
+if grep -qE '^NODE_ENV=production' "$ENV_FILE"; then
   IS_PROD=yes
   COMPOSE_FILE="docker-compose.prod.yml"
   if [[ "${DEMO_ON_PROD:-}" != "yes" ]]; then
@@ -48,8 +57,13 @@ if grep -qE '^NODE_ENV=production' .env; then
 fi
 export COMPOSE_FILE
 
-LOGIN=$(grep -E '^BOOTSTRAP_ADMIN_LOGIN=' .env | cut -d= -f2)
-PASS=$(grep -E '^BOOTSTRAP_ADMIN_PASSWORD=' .env | cut -d= -f2)
+# Имя пользователя и базы у каждого экземпляра своё — зашивать нельзя
+PG_USER=$(grep -E '^POSTGRES_USER=' "$ENV_FILE" | cut -d= -f2)
+PG_DB=$(grep -E '^POSTGRES_DB=' "$ENV_FILE" | cut -d= -f2)
+export PG_USER="${PG_USER:-avtoklyuch}" PG_DB="${PG_DB:-avtoklyuch}" ENV_FILE
+
+LOGIN=$(grep -E '^BOOTSTRAP_ADMIN_LOGIN=' "$ENV_FILE" | cut -d= -f2)
+PASS=$(grep -E '^BOOTSTRAP_ADMIN_PASSWORD=' "$ENV_FILE" | cut -d= -f2)
 
 JAR=$(mktemp)
 trap 'rm -f "$JAR"' EXIT
@@ -343,8 +357,13 @@ for entry in payload:
 
 pathlib.Path('/tmp/demo-dates.sql').write_text('\n'.join(sql))
 subprocess.run(
-    'docker compose -f %s exec -T db psql -U avtoklyuch -d avtoklyuch -q -f - < /tmp/demo-dates.sql'
-    % os.environ.get('COMPOSE_FILE', 'docker-compose.yml'),
+    'docker compose --env-file %s -f %s exec -T db psql -U %s -d %s -q -f - < /tmp/demo-dates.sql'
+    % (
+        os.environ.get('ENV_FILE', '.env'),
+        os.environ.get('COMPOSE_FILE', 'docker-compose.yml'),
+        os.environ.get('PG_USER', 'avtoklyuch'),
+        os.environ.get('PG_DB', 'avtoklyuch'),
+    ),
     shell=True, capture_output=True, text=True,
 )
 os.unlink('/tmp/demo-dates.sql')

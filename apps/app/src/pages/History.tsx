@@ -35,6 +35,7 @@ export function History() {
   const [managers, setManagers] = useState<UserRow[]>([]);
   const [preview, setPreview] = useState<CalculationRecord | null>(null);
   const [loading, setLoading] = useState(true);
+  const [savingOutcome, setSavingOutcome] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -51,6 +52,40 @@ export function History() {
       setLoading(false);
     }
   }, [search, userId, period, toast]);
+
+  /**
+   * Отметить, чем кончилась сделка.
+   *
+   * Отдельным действием, а не автоматически по этапу сделки: расчётов на
+   * одного клиента бывает несколько, а выиграть можно только один, и выбрать
+   * какой — решение человека. От этой отметки зависит вознаграждение агента,
+   * поэтому она и считается в тот же момент на сервере.
+   */
+  const setOutcome = async (calc: CalculationRecord, outcome: 'won' | 'lost' | null) => {
+    setSavingOutcome(true);
+    try {
+      const answer = await api.post<{ ok: true; commissionUsd: number | null }>(
+        `/api/calculations/${calc.id}/outcome`,
+        { outcome },
+      );
+      setPreview({ ...calc, outcome, commissionUsd: answer.commissionUsd });
+      await load();
+
+      if (outcome === 'won' && answer.commissionUsd) {
+        toast.success(`Сделка выиграна. Агенту начислено ${formatMoney(answer.commissionUsd)}`);
+      } else if (outcome === 'won') {
+        toast.success('Сделка отмечена выигранной');
+      } else if (outcome === 'lost') {
+        toast.success('Сделка отмечена проигранной');
+      } else {
+        toast.success('Отметка снята');
+      }
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : 'Не удалось отметить исход');
+    } finally {
+      setSavingOutcome(false);
+    }
+  };
 
   // Поиск с задержкой: печатать и ждать ответа на каждую букву неудобно
   useEffect(() => {

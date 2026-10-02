@@ -93,6 +93,18 @@ export interface CalculationRecord {
   result: CalcResult;
   /** Курс на момент расчёта — снимок, а не текущий курс */
   fx: FxRates | null;
+  /**
+   * Чем кончилась сделка. Проставляется вручную: система не может узнать,
+   * купил человек машину или передумал.
+   */
+  outcome: 'won' | 'lost' | null;
+  /**
+   * Вознаграждение агента — считается один раз, в момент отметки «выиграна»,
+   * и дальше не пересчитывается: изменившиеся условия агента не должны
+   * переписывать уже начисленное задним числом.
+   */
+  commissionUsd: number | null;
+  agentName: string | null;
   costUsd: number;
   marginUsd: number;
   clientTotalUsd: number;
