@@ -33,9 +33,11 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         delivery_discount_percent: number;
         token_version: number;
         is_active: boolean;
+        must_change_password: boolean;
       }>(
         `SELECT id, login, full_name, role, password_hash,
-                delivery_discount_percent, token_version, is_active
+                delivery_discount_percent, token_version, is_active,
+                must_change_password
            FROM users WHERE lower(login) = lower($1)`,
         [body.login],
       );
@@ -59,6 +61,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
           fullName: row.full_name,
           role: row.role,
           deliveryDiscountPercent: row.delivery_discount_percent,
+          mustChangePassword: row.must_change_password,
         },
       };
     },
@@ -88,11 +91,22 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       throw new HttpError(400, 'Текущий пароль указан неверно');
     }
 
+    // Новый пароль не должен совпадать со старым: иначе «смена» выданного
+    // пароля сводится к тому, что человек вводит его же второй раз
+    if (await verifyPassword(body.newPassword, row.password_hash)) {
+      throw new HttpError(400, 'Новый пароль совпадает с текущим');
+    }
+
     const hash = await hashPassword(body.newPassword);
-    // token_version++ гасит все ранее выданные сессии, включая чужие устройства
+    // token_version++ гасит все ранее выданные сессии, включая чужие устройства.
+    // Здесь же снимается требование сменить выданный пароль — оно выполнено
     await queryOne(
-      `UPDATE users SET password_hash = $1, token_version = token_version + 1, updated_at = now()
-         WHERE id = $2 RETURNING id`,
+      `UPDATE users
+          SET password_hash = $1,
+              token_version = token_version + 1,
+              must_change_password = false,
+              updated_at = now()
+        WHERE id = $2 RETURNING id`,
       [hash, actor.id],
     );
 

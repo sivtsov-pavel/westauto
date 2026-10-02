@@ -4,6 +4,7 @@ import { can, type Permissions, type Role } from '@avtoklyuch/shared';
 import { queryOne } from '../db/pool.js';
 import { config, isProduction } from './env.js';
 import { HttpError } from './errors.js';
+import { assertPasswordChanged } from './password-policy.js';
 
 const SECRET = new TextEncoder().encode(config.JWT_SECRET);
 const ISSUER = 'avtoklyuch';
@@ -15,6 +16,8 @@ export interface SessionUser {
   fullName: string;
   role: Role;
   deliveryDiscountPercent: number;
+  /** Пароль выдан администратором и ещё не сменён — дальше экрана смены не пускаем */
+  mustChangePassword: boolean;
 }
 
 interface TokenClaims {
@@ -75,8 +78,10 @@ export async function resolveSession(
     delivery_discount_percent: number;
     token_version: number;
     is_active: boolean;
+    must_change_password: boolean;
   }>(
-    `SELECT id, login, full_name, role, delivery_discount_percent, token_version, is_active
+    `SELECT id, login, full_name, role, delivery_discount_percent, token_version,
+            is_active, must_change_password
        FROM users WHERE id = $1`,
     [claims.sub],
   );
@@ -89,6 +94,7 @@ export async function resolveSession(
     fullName: row.full_name,
     role: row.role,
     deliveryDiscountPercent: row.delivery_discount_percent,
+    mustChangePassword: row.must_change_password,
   };
 }
 
@@ -99,6 +105,7 @@ export async function requireAuth(
 ): Promise<void> {
   const user = await resolveSession(request);
   if (!user) throw new HttpError(401, 'Нужно войти в систему');
+  assertPasswordChanged(request, user);
   request.user = user;
 }
 

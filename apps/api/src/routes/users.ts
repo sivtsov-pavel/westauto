@@ -49,8 +49,9 @@ export async function userRoutes(app: FastifyInstance): Promise<void> {
     if (existing) throw conflict('Такой логин уже занят');
 
     const row = await queryOne<Record<string, unknown>>(
-      `INSERT INTO users (login, full_name, password_hash, role, delivery_discount_percent)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO users (login, full_name, password_hash, role, delivery_discount_percent,
+                          must_change_password)
+       VALUES ($1, $2, $3, $4, $5, true)
        RETURNING id, login, full_name, role, delivery_discount_percent, is_active, created_at`,
       [
         body.login,
@@ -118,7 +119,12 @@ export async function userRoutes(app: FastifyInstance): Promise<void> {
       if (body.password) {
         // Смена пароля гасит все выданные пользователю токены
         await client.query(
-          `UPDATE users SET password_hash = $1, token_version = token_version + 1 WHERE id = $2`,
+          `UPDATE users
+              SET password_hash = $1,
+                  token_version = token_version + 1,
+                  -- Пароль снова знает не только владелец учётной записи
+                  must_change_password = true
+            WHERE id = $2`,
           [await hashPassword(body.password), id],
         );
         await logChange(
