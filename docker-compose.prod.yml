@@ -53,6 +53,10 @@ services:
       LOT_FETCHER_ENABLED: ${LOT_FETCHER_ENABLED}
       LOT_FETCHER_TIMEOUT_MS: ${LOT_FETCHER_TIMEOUT_MS}
       UPLOADS_DIR: /data/uploads
+      # Бренд экземпляра: его отдаёт GET /api/brand экрану входа CRM.
+      # Та же переменная, что у сайта ниже, и то же значение по умолчанию —
+      # без .env экземпляра всё работает как раньше
+      BRAND_PROFILE: ${BRAND_PROFILE:-westauto}
     volumes:
       - uploads:/data/uploads
 

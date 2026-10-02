@@ -1,7 +1,9 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/state/auth';
 import { can, ROLE_LABELS, type Permissions, type Role } from '@avtoklyuch/shared';
-import { BookIcon, CalcIcon, CarIcon, ChartIcon, ClockIcon, EyeIcon, GearIcon, KeyMark, ListIcon, UsersIcon, WalletIcon } from './Icons';
+import { useBrand } from '@/state/brand';
+import { BrandMarkIcon, BrandName } from './Brand';
+import { BookIcon, CalcIcon, CarIcon, ChartIcon, ClockIcon, EyeIcon, GearIcon, ListIcon, UsersIcon, WalletIcon } from './Icons';
 import { InstallButton } from './InstallButton';
 
 /**
@@ -42,6 +44,9 @@ const HOTKEYS = [
 
 export function Sidebar() {
   const { user, logout } = useAuth();
+  // Имя в шапке — то же, что на экране входа: оно приходит из бренда
+  // экземпляра, а не зашито в вёрстку
+  const brand = useBrand();
   if (!user) return null;
 
   const initials = user.fullName
@@ -61,10 +66,12 @@ export function Sidebar() {
     <aside className="sidebar">
       <div className="stack" style={{ gap: 28 }}>
         <div className="brand">
-          <span style={{ color: 'var(--accent)', display: 'flex' }}>
-            <KeyMark />
-          </span>
-          Авто<em>Ключ</em>
+          {brand && (
+            <span style={{ color: 'var(--accent)', display: 'flex' }}>
+              <BrandMarkIcon brand={brand} />
+            </span>
+          )}
+          <BrandName brand={brand} />
         </div>
 
         <nav className="nav">

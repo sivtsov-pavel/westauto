@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { AuthProvider } from './state/auth';
+import { BrandProvider } from './state/brand';
 import { ToastProvider } from './state/toast';
 import './styles/app.css';
 
@@ -27,9 +28,15 @@ createRoot(container).render(
     {/* basename: приложение живёт на /app/ рядом с публичным сайтом */}
     <BrowserRouter basename="/app">
       <ToastProvider>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
+        {/*
+          Бренд — выше проверки сессии: его показывает и экран входа, и шапка
+          приложения, а запрос за ним не требует авторизации
+        */}
+        <BrandProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </BrandProvider>
       </ToastProvider>
     </BrowserRouter>
   </StrictMode>,

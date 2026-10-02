@@ -264,3 +264,35 @@ export function ChartIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/**
+ * Корабль — знак бренда для логистического экземпляра.
+ *
+ * Отдельный знак, а не универсальный: ключ в KeyMark — это знак АвтоКлюча,
+ * и ставить его клиенту, который возит машины морем, бессмысленно. Геометрия
+ * той же толщины линии, что у KeyMark: знаки стоят в одном и том же месте
+ * шапки, и разная толщина штриха сразу бросается в глаза.
+ */
+export function ShipMark({ size = 22, ...rest }: IconProps) {
+  return (
+    <Icon size={size} {...rest}>
+      {/* Корпус */}
+      <path
+        d="M3.4 13.8h17.2l-2.1 5a2.2 2.2 0 0 1-2.03 1.35H7.53A2.2 2.2 0 0 1 5.5 18.8l-2.1-5Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      {/* Мачта */}
+      <path d="M12 13.8V3.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      {/* Парус */}
+      <path
+        d="M12 4.8l5.4 6.4H12"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Icon>
+  );
+}

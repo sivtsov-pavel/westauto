@@ -1,10 +1,19 @@
 import { useState, type FormEvent } from 'react';
+import { brandFooter } from '@avtoklyuch/shared';
 import { ApiError } from '@/api/client';
-import { InfoIcon, KeyMark } from '@/components/Icons';
+import { BrandMarkIcon, BrandName } from '@/components/Brand';
+import { InfoIcon } from '@/components/Icons';
 import { useAuth } from '@/state/auth';
+import { useBrand } from '@/state/brand';
 
 export function Login() {
   const { login } = useAuth();
+  /*
+   * Бренд экземпляра. Пока он не приехал, на экране нет ни чужого имени, ни
+   * чужой цитаты: система ставится разным клиентам одним образом, и мелькнувшее
+   * на миг название конкурента запоминается лучше, чем правильное.
+   */
+  const brand = useBrand();
   const [loginValue, setLoginValue] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -24,30 +33,45 @@ export function Login() {
 
   return (
     <div className="login">
-      <div className="login-brand">
+      {/*
+        Фон панели задаём backgroundColor, а не background: сокращённое
+        свойство сбросило бы background-image с двумя световыми пятнами,
+        и панель стала бы плоской заливкой.
+      */}
+      <div
+        className="login-brand"
+        style={brand?.darkPanel ? { backgroundColor: brand.darkPanel } : undefined}
+      >
         <div className="brand" style={{ padding: 0 }}>
-          <span style={{ color: 'var(--accent)', display: 'flex' }}>
-            <KeyMark size={24} />
-          </span>
-          Авто<em>Ключ</em>
+          {brand && (
+            <span style={{ color: 'var(--accent)', display: 'flex' }}>
+              <BrandMarkIcon brand={brand} size={24} />
+            </span>
+          )}
+          <BrandName brand={brand} />
           <span className="key" style={{ marginLeft: 8 }}>ВНУТРЕННЯЯ СИСТЕМА</span>
         </div>
 
         <div className="stack" style={{ gap: 24, maxWidth: 560 }}>
-          <span style={{ color: 'var(--accent)' }}>
-            <KeyMark size={64} />
-          </span>
-          <h1 className="login-quote">
-            «Один расчёт — от ставки на аукционе до цены клиенту.»
-          </h1>
-          <p className="muted" style={{ margin: 0, fontSize: 15, lineHeight: 1.6 }}>
-            Платформа расчёта стоимости доставки и растаможки авто с Copart и IAAI под ключ.
-            Тарифы, история изменений и роли — в одном месте.
-          </p>
+          {brand && (
+            <span style={{ color: 'var(--accent)' }}>
+              <BrandMarkIcon brand={brand} size={64} />
+            </span>
+          )}
+          {/* Цитата и описание — слова клиента о его деле. Чужих здесь быть
+              не должно, поэтому до ответа блоки просто не рисуются */}
+          {brand && <h1 className="login-quote">{brand.quote}</h1>}
+          {brand && (
+            <p className="muted" style={{ margin: 0, fontSize: 15, lineHeight: 1.6 }}>
+              {brand.intro}
+            </p>
+          )}
         </div>
 
         <div className="mono faint" style={{ fontSize: 12 }}>
-          © {new Date().getFullYear()} АвтоКлюч · доступ только для сотрудников
+          {brand
+            ? brandFooter(brand, new Date().getFullYear())
+            : 'Доступ только для сотрудников'}
         </div>
       </div>
 
