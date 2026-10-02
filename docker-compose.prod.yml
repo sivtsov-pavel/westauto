@@ -79,6 +79,11 @@ services:
       NODE_ENV: production
       SITE_PORT: 4174
       API_URL: http://api:3000
+      # Бренд сайта и закрытие от поисковиков — у каждого экземпляра свои.
+      # Значения по умолчанию повторяют WestAuto: без .env экземпляра всё
+      # работает как раньше.
+      BRAND_PROFILE: ${BRAND_PROFILE:-westauto}
+      SITE_NOINDEX: ${SITE_NOINDEX:-false}
 
   web:
     build:
