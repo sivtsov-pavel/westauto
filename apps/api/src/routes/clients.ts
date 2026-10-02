@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { query, queryOne } from '../db/pool.js';
 import { requireAuth } from '../lib/auth.js';
 import { conflict, notFound } from '../lib/errors.js';
+import { OWNER_OF, demoScopeSql, ownerScopeSql } from '../lib/scope.js';
+import { isDemoHidden } from '../services/settings.js';
 
 /**
  * Клиенты.
@@ -54,6 +56,9 @@ function mapClient(r: Record<string, unknown>): Record<string, unknown> {
     agentName: (r['agent_name'] as string | null) ?? null,
     managerId: (r['manager_id'] as string | null) ?? null,
     notes: (r['notes'] as string | null) ?? null,
+    // Учебная запись помечается в интерфейсе: по карточке должно быть видно,
+    // что перед человеком не настоящий клиент
+    isDemo: Boolean(r['is_demo']),
     dealsCount: Number(r['deals_count'] ?? 0),
     lastDealAt: r['last_deal_at'] ? (r['last_deal_at'] as Date).toISOString() : null,
     createdAt: (r['created_at'] as Date).toISOString(),
@@ -75,11 +80,14 @@ export async function clientRoutes(app: FastifyInstance): Promise<void> {
     const where: string[] = [];
     const params: unknown[] = [];
 
-    // Агент видит только тех, кого привёл сам
-    if (user.role === 'agent') {
-      params.push(user.id);
-      where.push(`c.agent_id = $${params.length}`);
-    }
+    // Агент видит тех, кого привёл сам; менеджер — своих и ещё ничьих
+    const scope = ownerScopeSql(user, OWNER_OF.clients(), params);
+    if (scope) where.push(scope);
+
+    // Учебные записи прячутся, а не удаляются: к учебному клиенту может быть
+    // привязана настоящая сделка, и удаление снесло бы её по каскаду
+    const demo = demoScopeSql(await isDemoHidden(), 'c');
+    if (demo) where.push(demo);
 
     if (q.search?.trim()) {
       const term = q.search.trim();
@@ -117,14 +125,19 @@ export async function clientRoutes(app: FastifyInstance): Promise<void> {
     const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
     const user = request.user!;
 
+    // Чужая запись отвечает тем же «не найден», что и несуществующая:
+    // иначе по разнице ответов можно перебором узнать, кто есть у коллег
+    const params: unknown[] = [id];
+    const scope = ownerScopeSql(user, OWNER_OF.clients(), params);
+
     const row = await queryOne<Record<string, unknown>>(
       `SELECT c.*, a.full_name AS agent_name,
               (SELECT count(*) FROM deals d WHERE d.client_id = c.id)          AS deals_count,
               (SELECT max(d.created_at) FROM deals d WHERE d.client_id = c.id) AS last_deal_at
          FROM clients c
          LEFT JOIN users a ON a.id = c.agent_id
-        WHERE c.id = $1 AND ($2::uuid IS NULL OR c.agent_id = $2::uuid)`,
-      [id, user.role === 'agent' ? user.id : null],
+        WHERE c.id = $1${scope ? ` AND ${scope}` : ''}`,
+      params,
     );
     if (!row) throw notFound('Клиент не найден');
 
@@ -230,12 +243,14 @@ export async function clientRoutes(app: FastifyInstance): Promise<void> {
 
     sets.push('updated_at = now()');
     params.push(id);
-    params.push(user.role === 'agent' ? user.id : null);
+    const idParam = params.length;
+    // Правит только тот, чья это запись: иначе менеджер мог бы переписать
+    // клиента коллеги, не видя его в списке
+    const scope = ownerScopeSql(user, OWNER_OF.clients(''), params);
 
     const row = await queryOne<{ id: string }>(
       `UPDATE clients SET ${sets.join(', ')}
-        WHERE id = $${params.length - 1}
-          AND ($${params.length}::uuid IS NULL OR agent_id = $${params.length}::uuid)
+        WHERE id = $${idParam}${scope ? ` AND ${scope}` : ''}
         RETURNING id`,
       params,
     );

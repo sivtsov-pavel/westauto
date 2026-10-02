@@ -3,6 +3,14 @@ import { z } from 'zod';
 import { pool, query, queryOne, transaction } from '../db/pool.js';
 import { requireAuth } from '../lib/auth.js';
 import { badRequest, notFound } from '../lib/errors.js';
+import {
+  OWNER_OF,
+  demoScopeSql,
+  ownerScopeSql,
+  ownsRecord,
+  type ScopeUser,
+} from '../lib/scope.js';
+import { isDemoHidden } from '../services/settings.js';
 
 /**
  * Сделки — одно авто от заявки до выдачи.
@@ -87,6 +95,8 @@ function mapDeal(r: Record<string, unknown>): Record<string, unknown> {
     portArrivedAt: day(r['port_arrived_at']),
     deliveredAt: day(r['delivered_at']),
     notes: (r['notes' ] as string | null) ?? null,
+    // Чтобы на доске и в карточке было видно: это учебная сделка
+    isDemo: Boolean(r['is_demo']),
     // Итоги по деньгам считает база: складывать в приложении — верный способ
     // однажды показать одну сумму в списке и другую в карточке
     plannedUsd: Number(r['planned_usd'] ?? 0),
@@ -133,10 +143,15 @@ export async function dealRoutes(app: FastifyInstance): Promise<void> {
     const where: string[] = [];
     const params: unknown[] = [];
 
-    if (user.role === 'agent') {
-      params.push(user.id);
-      where.push(`d.agent_id = $${params.length}`);
-    }
+    const scope = ownerScopeSql(user, OWNER_OF.deals(), params);
+    if (scope) where.push(scope);
+
+    // Учебные сделки прячутся настройкой, а не удаляются: удалить их значит
+    // потерять то, на чём заказчик учился, и рискнуть привязанной к ним живой
+    // сделкой
+    const demo = demoScopeSql(await isDemoHidden(), 'd');
+    if (demo) where.push(demo);
+
     if (q.stage) {
       params.push(q.stage);
       where.push(`d.stage = $${params.length}::deal_stage`);
@@ -180,6 +195,9 @@ export async function dealRoutes(app: FastifyInstance): Promise<void> {
     const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
     const user = request.user!;
 
+    const params: unknown[] = [id];
+    const dealScope = ownerScopeSql(user, OWNER_OF.deals(), params);
+
     const row = await queryOne<Record<string, unknown>>(
       `SELECT d.*, c.full_name AS client_name, c.phone AS client_phone,
               a.full_name AS agent_name,
@@ -187,8 +205,8 @@ export async function dealRoutes(app: FastifyInstance): Promise<void> {
          FROM deals d
          JOIN clients c ON c.id = d.client_id
          LEFT JOIN users a ON a.id = d.agent_id
-        WHERE d.id = $1 AND ($2::uuid IS NULL OR d.agent_id = $2::uuid)`,
-      [id, user.role === 'agent' ? user.id : null],
+        WHERE d.id = $1${dealScope ? ` AND ${dealScope}` : ''}`,
+      params,
     );
     if (!row) throw notFound('Сделка не найдена');
 
@@ -271,12 +289,13 @@ export async function dealRoutes(app: FastifyInstance): Promise<void> {
     const body = dealBody.parse(request.body);
     const user = request.user!;
 
-    const client = await queryOne<{ id: string; agent_id: string | null }>(
-      'SELECT id, agent_id FROM clients WHERE id = $1',
-      [body.clientId],
-    );
+    const client = await queryOne<{
+      id: string;
+      agent_id: string | null;
+      manager_id: string | null;
+    }>('SELECT id, agent_id, manager_id FROM clients WHERE id = $1', [body.clientId]);
     if (!client) throw badRequest('Клиент не найден');
-    if (user.role === 'agent' && client.agent_id !== user.id) {
+    if (!ownsRecord(user, { agentId: client.agent_id, managerId: client.manager_id })) {
       throw notFound('Клиент не найден');
     }
 
@@ -346,12 +365,13 @@ export async function dealRoutes(app: FastifyInstance): Promise<void> {
     const body = dealBody.partial().parse(request.body);
     const user = request.user!;
 
-    const current = await queryOne<{ stage: string; agent_id: string | null }>(
-      'SELECT stage, agent_id FROM deals WHERE id = $1',
-      [id],
-    );
+    const current = await queryOne<{
+      stage: string;
+      agent_id: string | null;
+      manager_id: string | null;
+    }>('SELECT stage, agent_id, manager_id FROM deals WHERE id = $1', [id]);
     if (!current) throw notFound('Сделка не найдена');
-    if (user.role === 'agent' && current.agent_id !== user.id) {
+    if (!ownsRecord(user, { agentId: current.agent_id, managerId: current.manager_id })) {
       throw notFound('Сделка не найдена');
     }
 
@@ -566,14 +586,15 @@ export async function dealRoutes(app: FastifyInstance): Promise<void> {
 }
 
 /** Агент работает только со своими сделками — проверяем на каждом действии. */
-async function assertAccess(
-  dealId: string,
-  user: { id: string; role: string },
-): Promise<void> {
-  const row = await queryOne<{ agent_id: string | null }>(
-    'SELECT agent_id FROM deals WHERE id = $1',
+async function assertAccess(dealId: string, user: ScopeUser): Promise<void> {
+  const row = await queryOne<{ agent_id: string | null; manager_id: string | null }>(
+    'SELECT agent_id, manager_id FROM deals WHERE id = $1',
     [dealId],
   );
   if (!row) throw notFound('Сделка не найдена');
-  if (user.role === 'agent' && row.agent_id !== user.id) throw notFound('Сделка не найдена');
+  // «Не найдена» и «не ваша» отвечают одинаково: по разнице ответов можно
+  // было бы перебором узнать, какие сделки ведут коллеги
+  if (!ownsRecord(user, { agentId: row.agent_id, managerId: row.manager_id })) {
+    throw notFound('Сделка не найдена');
+  }
 }

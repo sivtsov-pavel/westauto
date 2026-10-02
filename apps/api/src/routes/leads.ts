@@ -4,6 +4,8 @@ import { normalizeReferralCode } from '@avtoklyuch/shared';
 import { pool, query, queryOne } from '../db/pool.js';
 import { requireAuth } from '../lib/auth.js';
 import { notFound } from '../lib/errors.js';
+import { OWNER_OF, demoScopeSql, ownerScopeSql } from '../lib/scope.js';
+import { isDemoHidden } from '../services/settings.js';
 
 const leadSchema = z.object({
   name: z.string().min(2, 'Вкажіть ім’я').max(120),
@@ -84,10 +86,17 @@ export async function adminLeadRoutes(app: FastifyInstance): Promise<void> {
     // Агент видит только тех клиентов, которых привёл сам
     const where: string[] = [];
     const params: unknown[] = [];
-    if (user.role === 'agent') {
-      params.push(user.id);
-      where.push(`l.agent_id = $${params.length}`);
-    }
+    // Агент видит только свои заявки. Менеджеру виден весь входящий поток:
+    // владельца у заявки с сайта нет, и «только свои» означало бы, что новая
+    // заявка не видна никому, пока её кто-то не присвоит
+    const scope = ownerScopeSql(user, OWNER_OF.leads(), params);
+    if (scope) where.push(scope);
+
+    // Учебные заявки скрываются той же настройкой, что клиенты и сделки:
+    // иначе стенд выглядел бы вычищенным наполовину
+    const demo = demoScopeSql(await isDemoHidden(), 'l');
+    if (demo) where.push(demo);
+
     if (q.onlyNew) where.push('NOT l.is_processed');
 
     const rows = await query<Record<string, unknown>>(
@@ -110,6 +119,7 @@ export async function adminLeadRoutes(app: FastifyInstance): Promise<void> {
         agentName: (r['agent_name'] as string | null) ?? null,
         source: r['source'] as string,
         isProcessed: Boolean(r['is_processed']),
+        isDemo: Boolean(r['is_demo']),
         createdAt: (r['created_at'] as Date).toISOString(),
       })),
     };
@@ -127,10 +137,12 @@ export async function adminLeadRoutes(app: FastifyInstance): Promise<void> {
     const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
     const user = request.user!;
 
+    const leadParams: unknown[] = [id];
+    const leadScope = ownerScopeSql(user, OWNER_OF.leads(''), leadParams);
+
     const lead = await queryOne<Record<string, unknown>>(
-      `SELECT * FROM leads
-        WHERE id = $1 AND ($2::uuid IS NULL OR agent_id = $2::uuid)`,
-      [id, user.role === 'agent' ? user.id : null],
+      `SELECT * FROM leads WHERE id = $1${leadScope ? ` AND ${leadScope}` : ''}`,
+      leadParams,
     );
     if (!lead) throw notFound('Заявка не найдена');
 
@@ -153,8 +165,9 @@ export async function adminLeadRoutes(app: FastifyInstance): Promise<void> {
       ? found.id
       : (
           await queryOne<{ id: string }>(
-            `INSERT INTO clients (full_name, phone, source, agent_id, manager_id, notes)
-             VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+            `INSERT INTO clients
+               (full_name, phone, source, agent_id, manager_id, notes, is_demo)
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
             [
               lead['name'] as string,
               phone,
@@ -162,6 +175,10 @@ export async function adminLeadRoutes(app: FastifyInstance): Promise<void> {
               lead['agent_id'] ?? null,
               user.role === 'agent' ? null : user.id,
               lead['comment'] ?? null,
+              // Из учебной заявки получается учебный клиент: иначе он
+              // «отмоется» при переводе в сделку и останется на стенде
+              // настоящим с виду
+              Boolean(lead['is_demo']),
             ],
           )
         )!.id;
@@ -179,11 +196,14 @@ export async function adminLeadRoutes(app: FastifyInstance): Promise<void> {
     const body = z.object({ isProcessed: z.boolean() }).parse(request.body);
 
     const user = request.user!;
+    const params: unknown[] = [body.isProcessed, id];
+    const scope = ownerScopeSql(user, OWNER_OF.leads(''), params);
+
     const row = await queryOne<{ id: string }>(
       `UPDATE leads SET is_processed = $1
-        WHERE id = $2 AND ($3::uuid IS NULL OR agent_id = $3::uuid)
+        WHERE id = $2${scope ? ` AND ${scope}` : ''}
         RETURNING id`,
-      [body.isProcessed, id, user.role === 'agent' ? user.id : null],
+      params,
     );
     if (!row) throw notFound('Заявка не найдена');
     return { ok: true };

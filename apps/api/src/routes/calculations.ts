@@ -18,9 +18,10 @@ import {
 import { pool, query, queryOne } from '../db/pool.js';
 import { requireAuth, type SessionUser } from '../lib/auth.js';
 import { HttpError, notFound } from '../lib/errors.js';
+import { OWNER_OF, demoScopeSql, ownerScopeSql } from '../lib/scope.js';
 import { customsMode, getCustomsQuote } from '../services/customs.js';
 import { getFxRates } from '../services/fx.js';
-import { getSettings } from '../services/settings.js';
+import { getSettings, isDemoHidden } from '../services/settings.js';
 
 const platformEnum = z.enum(['copart', 'iaai', 'copart_uk', 'copart_ca', 'iaai_ca', 'manheim']);
 const fuelEnum = z.enum(['petrol', 'diesel', 'electric', 'hybrid']);
@@ -268,11 +269,16 @@ export async function calculationRoutes(app: FastifyInstance): Promise<void> {
     const where: string[] = [`c.status = 'saved'`];
     const params: unknown[] = [];
 
-    // Агент видит только свои расчёты — чужие сделки его не касаются
-    if (request.user!.role === 'agent') {
-      params.push(request.user!.id);
-      where.push(`c.agent_id = $${params.length}`);
-    }
+    // Агент видит только свои расчёты — чужие сделки его не касаются.
+    // Менеджер видит свои: владелец расчёта — его автор (user_id)
+    const scope = ownerScopeSql(request.user!, OWNER_OF.calculations(), params);
+    if (scope) where.push(scope);
+
+    // Учебные расчёты скрываются вместе с остальными учебными записями.
+    // Условие без параметров — поэтому срез params ниже (он отрезает limit и
+    // offset для запроса итогов) остаётся верным
+    const demo = demoScopeSql(await isDemoHidden(), 'c');
+    if (demo) where.push(demo);
 
     if (q.search) {
       params.push(`%${q.search}%`);
@@ -592,6 +598,7 @@ function mapCalculation(row: Record<string, unknown>) {
     costUsd: Number(row['cost_usd']),
     marginUsd: Number(row['margin_usd']),
     clientTotalUsd: Number(row['client_total_usd']),
+    isDemo: Boolean(row['is_demo']),
     createdAt: (row['created_at'] as Date).toISOString(),
     updatedAt: (row['updated_at'] as Date).toISOString(),
   };
