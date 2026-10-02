@@ -4,6 +4,7 @@ import { formatMoney, PLATFORM_LABELS, type Platform, type ShowcaseStatus } from
 import { ArrowRight } from '@/components/Icons';
 import { LeadForm } from '@/components/LeadForm';
 import type { DictKey } from '@/content/dict';
+import { BRAND } from '@/content/brand';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useI18n } from '@/i18n';
 import { useRouteData } from '@/ssr-data';
@@ -50,7 +51,7 @@ export function CarDetail() {
   const car = data?.item ?? null;
 
   useDocumentTitle(
-    car ? `${car.title} — ${formatMoney(car.turnkeyPriceUsd)} | WestAuto` : 'WestAuto',
+    car ? `${car.title} — ${formatMoney(car.turnkeyPriceUsd)} | ${BRAND.name}` : BRAND.name,
   );
 
   if (state === 'loading') return <div className="empty-state">{t('common.loading')}</div>;

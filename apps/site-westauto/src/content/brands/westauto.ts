@@ -10,6 +10,15 @@ import type { BrandProfile } from './types';
 export const westauto = {
   id: 'westauto',
 
+  /**
+   * Исходная вёрстка — та, что и была до появления тем.
+   *
+   * Класса на корневом элементе она не добавляет вовсе, и блок `.theme-*`
+   * в стилях её не касается: выдача боевого westauto.com.ua остаётся
+   * прежней до байта.
+   */
+  layout: 'classic',
+
   brand: {
     name: 'WestAuto',
     legalName: 'WestAuto — USA Auto Group',

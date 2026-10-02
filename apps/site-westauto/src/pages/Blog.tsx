@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from '@/components/Icons';
 import { ARTICLES } from '@/content/articles';
+import { BRAND } from '@/content/brand';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useI18n } from '@/i18n';
 
 export function Blog() {
   const { t, href, locale, tag } = useI18n();
-  useDocumentTitle(`${t('blog.title')} — WestAuto`);
+  useDocumentTitle(`${t('blog.title')} — ${BRAND.name}`);
 
   return (
     <section className="section">

@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowRight } from '@/components/Icons';
 import { LeadForm } from '@/components/LeadForm';
 import { findArticle, type Block } from '@/content/articles';
+import { BRAND } from '@/content/brand';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useI18n } from '@/i18n';
 
@@ -10,7 +11,9 @@ export function Article() {
   const { slug } = useParams<{ slug: string }>();
   const article = findArticle(slug ?? '');
 
-  useDocumentTitle(article ? `${article.title[locale]} — WestAuto` : `${t('blog.notFound')} — WestAuto`);
+  useDocumentTitle(
+    article ? `${article.title[locale]} — ${BRAND.name}` : `${t('blog.notFound')} — ${BRAND.name}`,
+  );
 
   if (!article) {
     return (

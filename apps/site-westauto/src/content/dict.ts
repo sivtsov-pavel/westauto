@@ -259,6 +259,117 @@ export const dict = {
     en: 'We have worked together for five years now — stable, no surprises. For a dealership that is what matters.',
   },
 
+  // ── Тема Larus: перший екран, переваги і прайс ────────────────────────────
+  //
+  // Блоки є тільки в темі larus (див. content/brands/larus.ts). Тексти зняті
+  // з laruslogistics.com: кожна цифра і кожна обіцянка тут — те, що клієнт
+  // пише про себе сам. Нічого виведеного: перша ж незнайома йому перевага
+  // обесцінить решту.
+
+  'lhero.badge': {
+    uk: 'Доставка авто з аукціонів США → Україна',
+    ru: 'Доставка авто с аукционов США → Украина',
+    en: 'Car delivery from US auctions → Ukraine',
+  },
+  'lhero.hint': {
+    uk: 'Безкоштовні акаунти аукціонів, страхування вантажу 1 %, навіть одне авто',
+    ru: 'Бесплатные аккаунты аукционов, страхование груза 1 %, даже одно авто',
+    en: 'Free auction accounts, 1% cargo insurance, even a single car',
+  },
+
+  // Показники під першим екраном. Значення — рядки, а не числа: приставка
+  // «від» і «з» перекладається разом із ними
+  'lstat.clients':    { uk: '1500+', ru: '1500+', en: '1500+' },
+  'lstat.clientsL':   { uk: 'клієнтів уже з нами', ru: 'клиентов уже с нами', en: 'happy clients' },
+  'lstat.since':      { uk: 'з 2020', ru: 'с 2020', en: 'since 2020' },
+  'lstat.sinceL':     { uk: 'у логістиці', ru: 'в логистике', en: 'in logistics' },
+  'lstat.insurance':  { uk: '1 %', ru: '1 %', en: '1%' },
+  'lstat.insuranceL': { uk: 'страхування вантажу', ru: 'страхование груза', en: 'cargo insurance' },
+  'lstat.delivery':   { uk: 'від $550', ru: 'от $550', en: 'from $550' },
+  'lstat.deliveryL':  { uk: 'доставка до Львова', ru: 'доставка до Львова', en: 'delivery to Lviv' },
+
+  'adv.eyebrow': { uk: 'Переваги', ru: 'Преимущества', en: 'Why us' },
+  'adv.title': {
+    uk: 'Чому клієнти залишаються з нами',
+    ru: 'Почему клиенты остаются с нами',
+    en: 'Why clients stay with us',
+  },
+  'adv.lead': {
+    uk: 'Працюємо напряму, без посередників — і показуємо кожен крок дороги.',
+    ru: 'Работаем напрямую, без посредников — и показываем каждый шаг дороги.',
+    en: 'We work directly, with no middlemen — and we show every step of the way.',
+  },
+
+  'adv.1':  { uk: 'Власні контейнери', ru: 'Собственные контейнеры', en: 'Our own containers' },
+  'adv.1d': {
+    uk: 'Зберігаємо авто на складі до відправки і вантажимо у свої контейнери з надійним кріпленням.',
+    ru: 'Храним авто на складе до отправки и грузим в свои контейнеры с надёжным креплением.',
+    en: 'We store the car until shipment and load it into our own containers, properly secured.',
+  },
+  'adv.2':  { uk: 'Реальні цифри до покупки', ru: 'Реальные цифры до покупки', en: 'Real numbers before you buy' },
+  'adv.2d': {
+    uk: 'Стан, історія і повна вартість — без прикрас і без прихованих платежів.',
+    ru: 'Состояние, история и полная стоимость — без прикрас и без скрытых платежей.',
+    en: 'Condition, history and the full cost — no embellishment, no hidden charges.',
+  },
+  'adv.3':  { uk: 'Фото і відео з кожного етапу', ru: 'Фото и видео с каждого этапа', en: 'Photos and video from every stage' },
+  'adv.3d': {
+    uk: 'Пояснюємо кожен крок, а де зараз авто — видно за VIN будь-коли.',
+    ru: 'Объясняем каждый шаг, а где сейчас авто — видно по VIN в любой момент.',
+    en: 'We explain every step, and you can check where the car is by VIN at any time.',
+  },
+
+  'adv.promoText': {
+    uk: 'Веземо авто з аукціонів США в Україну з 2020 року — від оплати лота до видачі у Львові. Надішліть посилання на лот, і ми порахуємо доставку.',
+    ru: 'Везём авто с аукционов США в Украину с 2020 года — от оплаты лота до выдачи во Львове. Пришлите ссылку на лот, и мы посчитаем доставку.',
+    en: 'We have been shipping cars from US auctions to Ukraine since 2020 — from paying for the lot to handover in Lviv. Send us a lot link and we will quote the delivery.',
+  },
+  'adv.promoCta': { uk: 'Порахувати доставку', ru: 'Посчитать доставку', en: 'Calculate delivery' },
+
+  'adv.p1': { uk: 'Безкоштовні акаунти COPART, IAAI та Manheim', ru: 'Бесплатные аккаунты COPART, IAAI и Manheim', en: 'Free COPART, IAAI and Manheim accounts' },
+  'adv.p2': { uk: 'Страхування вантажу — 1 % від вартості', ru: 'Страхование груза — 1 % от стоимости', en: 'Cargo insurance at 1% of the value' },
+  'adv.p3': { uk: 'Переказ оплати в USDT — 0,4 %', ru: 'Перевод оплаты в USDT — 0,4 %', en: 'Payment transfer in USDT at 0.4%' },
+  'adv.p4': { uk: 'Розмитнення на фізичну особу або на компанію', ru: 'Растаможка на физлицо или на компанию', en: 'Customs clearance for a person or a company' },
+  'adv.p5': { uk: 'Відстеження авто за VIN на кожному етапі', ru: 'Отслеживание авто по VIN на каждом этапе', en: 'Track the car by VIN at every stage' },
+  'adv.p6': { uk: 'Навіть одне авто, без обов’язкових обсягів', ru: 'Даже одно авто, без обязательных объёмов', en: 'Even a single car, no minimum volume' },
+
+  'price.eyebrow': { uk: 'Ціни', ru: 'Цены', en: 'Pricing' },
+  'price.title':   { uk: 'Скільки коштує доставка', ru: 'Сколько стоит доставка', en: 'What delivery costs' },
+  'price.lead': {
+    uk: 'Базові позиції прайсу. Точну суму під ваш лот порахує калькулятор нижче або менеджер у відповідь на заявку.',
+    ru: 'Базовые позиции прайса. Точную сумму под ваш лот посчитает калькулятор ниже или менеджер в ответ на заявку.',
+    en: 'The basic price list. The calculator below, or a manager replying to your request, works out the exact figure for your lot.',
+  },
+
+  'price.1':  { uk: 'Доставка до Львова', ru: 'Доставка до Львова', en: 'Delivery to Lviv' },
+  'price.1v': { uk: 'від $550', ru: 'от $550', en: 'from $550' },
+  'price.1n': {
+    uk: 'Склад у США, контейнер, море, порт Клайпеди і дорога до Львова',
+    ru: 'Склад в США, контейнер, море, порт Клайпеды и дорога до Львова',
+    en: 'US warehouse, container, ocean, port of Klaipeda and the road to Lviv',
+  },
+  'price.2':  { uk: 'Брокерські послуги', ru: 'Брокерские услуги', en: 'Broker services' },
+  'price.2v': { uk: 'від $100', ru: 'от $100', en: 'from $100' },
+  'price.2n': {
+    uk: 'Підготовка документів і розмитнення — на фізособу або на компанію',
+    ru: 'Подготовка документов и растаможка — на физлицо или на компанию',
+    en: 'Paperwork and customs clearance, for a person or a company',
+  },
+  'price.3':  { uk: 'Страхування вантажу', ru: 'Страхование груза', en: 'Cargo insurance' },
+  'price.3v': { uk: '1 %', ru: '1 %', en: '1%' },
+  'price.3n': {
+    uk: 'Рахується від вартості авто',
+    ru: 'Считается от стоимости авто',
+    en: 'Calculated on the value of the car',
+  },
+  'price.4':  { uk: 'Переказ оплати в USDT', ru: 'Перевод оплаты в USDT', en: 'Payment transfer in USDT' },
+  'price.4v': { uk: '0,4 %', ru: '0,4 %', en: '0.4%' },
+  'price.4n': {
+    uk: 'Оплата лота й аукціонних зборів',
+    ru: 'Оплата лота и аукционных сборов',
+    en: 'Paying for the lot and the auction fees',
+  },
+
   // ── Видео ─────────────────────────────────────────────────────────────────
   'videos.eyebrow': { uk: 'Відео',       ru: 'Видео',        en: 'Video' },
   'videos.title':   { uk: 'Привезені авто на відео', ru: 'Привезённые авто на видео', en: 'Delivered cars on video' },

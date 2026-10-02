@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { BrandTheme } from '@/components/BrandTheme';
+import { LAYOUT } from '@/content/brand';
 import { CallFab } from '@/components/CallFab';
 import { InstallBanner } from '@/components/InstallBanner';
 import { Footer } from '@/components/Footer';
@@ -48,7 +49,7 @@ const ROUTES = (
 );
 
 export function App() {
-  return (
+  const shell = (
     <>
       {/* Цвета и шрифты бренда — до первой отрисовки, не после */}
       <BrandTheme />
@@ -65,4 +66,18 @@ export function App() {
       <InstallBanner />
     </>
   );
+
+  /*
+    Класс темы вёрстки на корневом элементе: от него пляшет блок `.theme-*`
+    в site.css. Обёртки нет вовсе, когда тема классическая, — а не обёртка с
+    пустым классом: разметка боевого WestAuto должна остаться ровно той, что
+    была до появления тем, вплоть до лишнего <div>.
+
+    Обёртка безобидна для прилипающей шапки и плавающих кнопок: у <div> нет
+    ни transform, ни overflow, ни filter, поэтому ни sticky, ни fixed внутри
+    него поведения не меняют.
+  */
+  if (LAYOUT === 'classic') return shell;
+
+  return <div className={`theme-${LAYOUT}`}>{shell}</div>;
 }

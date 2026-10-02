@@ -101,6 +101,87 @@ export interface BrandReview {
 }
 
 /**
+ * Тема вёрстки экземпляра.
+ *
+ * Профиль задаёт не только цвета и тексты, но и визуальный язык: у одного
+ * клиента заголовки секций слева с красной риской и этапы плиткой, у другого
+ * заголовки по центру, а этапы — горизонтальным таймлайном. Это уже не цвет,
+ * это компоновка, и подменить её переменной нельзя.
+ *
+ * Тема включает класс на корневом элементе (см. App) и дописывает к общим
+ * стилям блок `.theme-<имя>` в site.css. Разметка расходится условным
+ * рендером в тех немногих местах, где структура действительно другая, —
+ * вторая копия страницы разошлась бы с первой на первой же правке.
+ *
+ * `classic` — исходная вёрстка WestAuto. У неё класса на корне НЕТ вовсе:
+ * выдача живого сайта должна остаться ровно той, что была до появления тем.
+ */
+export type BrandLayout = 'classic' | 'larus';
+
+/**
+ * Показатель в полосе под первым экраном.
+ *
+ * Значение здесь ключом словаря, а не числом, в отличие от BrandStat: в этой
+ * полосе стоят не только числа, а «з 2020», «від $550», «1 %» — приставка
+ * переводится вместе со строкой, и формат у каждого языка свой.
+ */
+export interface BrandHeroStat {
+  readonly valueKey: DictKey;
+  readonly labelKey: DictKey;
+}
+
+/**
+ * Первый экран темы, где он собран иначе.
+ *
+ * Классической вёрстке эти поля не нужны: у неё в первом экране карточка
+ * расчёта и три пилюли с признаками, а не бейдж, строка-подсказка и полоса
+ * показателей. Поэтому блок необязателен — и отсутствует у WestAuto.
+ */
+export interface BrandHero {
+  /** Бейдж-пилюля над заголовком: куда и откуда везём. */
+  readonly badgeKey: DictKey;
+  /** Строка-подсказка под абзацем — одной фразой главные условия. */
+  readonly hintKey: DictKey;
+  readonly stats: readonly BrandHeroStat[];
+}
+
+/** Карточка преимущества. */
+export interface BrandAdvantage {
+  readonly titleKey: DictKey;
+  readonly descKey: DictKey;
+}
+
+/**
+ * Тёмная карточка-призыв в конце ряда преимуществ.
+ *
+ * Заголовка в ней нет: там стоит название бренда из BrandIdentity — держать
+ * его ещё и строкой словаря значит однажды переименовать в одном месте.
+ */
+export interface BrandPromo {
+  readonly textKey: DictKey;
+  readonly ctaKey: DictKey;
+}
+
+/** Блок преимуществ: карточки, тёмный призыв и список коротких пунктов. */
+export interface BrandAdvantages {
+  readonly cards: readonly BrandAdvantage[];
+  readonly promo: BrandPromo;
+  readonly points: readonly DictKey[];
+}
+
+/**
+ * Позиция прайса.
+ *
+ * Цена ключом словаря по той же причине, что и у BrandHeroStat: «від $550» и
+ * «from $550» — это одна позиция на двух языках, а не два числа.
+ */
+export interface BrandPrice {
+  readonly captionKey: DictKey;
+  readonly valueKey: DictKey;
+  readonly noteKey: DictKey;
+}
+
+/**
  * Палитра.
  *
  * Стили лежат одним файлом на все экземпляры, поэтому цвета задаёт профиль, а
@@ -147,6 +228,17 @@ export interface BrandPalette {
   readonly inkRgb: string;
   /** Цвет строки состояния мобильного браузера. */
   readonly themeColor: string;
+  /**
+   * Три цвета, которые встречаются только в теме с блоком преимуществ:
+   * кремовая подложка карточек, золотой заголовок на чёрной карточке и
+   * оранжевые звёзды отзывов.
+   *
+   * Необязательны, потому что блока может не быть вовсе. Профиль без них не
+   * печатает переменные совсем — выдача классической вёрстки не меняется.
+   */
+  readonly cream?: string;
+  readonly gold?: string;
+  readonly star?: string;
 }
 
 /** Шрифты бренда. */
@@ -202,6 +294,7 @@ export type BrandTextOverrides = Partial<Record<DictKey, Record<Locale, string>>
 export interface BrandProfile {
   /** Значение BRAND_PROFILE, по которому профиль выбирается. */
   readonly id: string;
+  readonly layout: BrandLayout;
   readonly brand: BrandIdentity;
   readonly contacts: BrandContacts;
   readonly stats: readonly BrandStat[];
@@ -220,6 +313,16 @@ export interface BrandProfile {
   readonly palette: BrandPalette;
   readonly fonts: BrandFonts;
   readonly app: BrandApp;
+  /**
+   * Блоки, которые рисует только тема с другой компоновкой.
+   *
+   * Отсутствуют — секции не рисуются вовсе. Это не «забыли заполнить»:
+   * классической вёрстке WestAuto первый экран с полосой показателей,
+   * карточки преимуществ и прайс не нужны, у неё на этих местах другое.
+   */
+  readonly hero?: BrandHero;
+  readonly advantages?: BrandAdvantages;
+  readonly prices?: readonly BrandPrice[];
   /** Отсутствует — профиль целиком живёт на общих текстах. */
   readonly overrides?: BrandTextOverrides;
 }

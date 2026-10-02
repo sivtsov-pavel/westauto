@@ -3,6 +3,7 @@ import type { ShowcaseStatus } from '@avtoklyuch/shared';
 import { CarCard, type CarSummary } from '@/components/CarCard';
 import { LeadForm } from '@/components/LeadForm';
 import type { DictKey } from '@/content/dict';
+import { BRAND } from '@/content/brand';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useI18n } from '@/i18n';
 import { useRouteData } from '@/ssr-data';
@@ -28,7 +29,7 @@ export function Cars() {
   const [filter, setFilter] = useState<ShowcaseStatus | 'all'>('all');
   const [shown, setShown] = useState(PAGE_SIZE);
 
-  useDocumentTitle(`${t('cars.title')} — WestAuto`);
+  useDocumentTitle(`${t('cars.title')} — ${BRAND.name}`);
 
   const { data, state } = useRouteData<{ items: CarSummary[] }>('/auto', () =>
     fetch('/api/public/showcase?limit=60').then((r) => (r.ok ? r.json() : { items: [] })),

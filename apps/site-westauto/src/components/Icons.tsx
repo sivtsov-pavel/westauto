@@ -81,6 +81,24 @@ export function PlayIcon({ size = 22, ...rest }: IconProps) {
   );
 }
 
+/** Галочка — последний шаг таймлайна и пункты списка преимуществ. */
+export function CheckIcon({ size = 16, ...rest }: IconProps) {
+  return (
+    <Icon size={size} {...rest}>
+      <path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </Icon>
+  );
+}
+
+/** Молния — строка-подсказка в первом экране. */
+export function BoltIcon({ size = 15, ...rest }: IconProps) {
+  return (
+    <Icon size={size} {...rest}>
+      <path d="M13 2L5 13.5h5L9.5 22 18 10h-5l1-8Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+    </Icon>
+  );
+}
+
 export function MenuIcon(props: IconProps) {
   return (
     <Icon {...props}>

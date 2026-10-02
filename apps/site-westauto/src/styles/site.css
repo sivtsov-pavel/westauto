@@ -1329,3 +1329,538 @@ p { margin: 0; }
   .install-actions { width: 100%; margin-top: 4px; }
   .install-actions .btn { flex: 1 1 auto; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Тема larus — візуальна мова сайту клієнта (laruslogistics.com)
+
+   Усе нижче працює ТІЛЬКИ під класом `.theme-larus` на кореневому елементі
+   (див. App.tsx). Класична верстка WestAuto цього класу не отримує зовсім,
+   тому жодне правило звідси її не торкається — виграш у каскаді тут завжди
+   за рахунок зайвого селектора класу, без !important.
+
+   Кольори, як і всюди, беруться з профілю через var(): --accent тут зелений,
+   --brand синій, --brand-deep темно-синій першого екрана й підвалу.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Типографіка теми ─────────────────────────────────────────────────── */
+
+.theme-larus .h1,
+.theme-larus .h2 { font-weight: 700; }
+
+/*
+  Надзаголовок секції: синій капс із великим міжлітерним інтервалом.
+  Моноширинного в наборі клієнта немає — надзаголовки в нього складені тим
+  самим Inter, що й решта тексту.
+*/
+.theme-larus .eyebrow {
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 2.6px;
+  color: var(--brand);
+}
+
+/*
+  Заголовки секцій у цій темі стоять ПО ЦЕНТРУ в три рівні: надзаголовок,
+  заголовок, сіре пояснення. Кнопка «усі авто» з правого боку при цьому йде
+  під заголовок і теж центрується.
+*/
+.theme-larus .section-head {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.theme-larus .section-head .stack {
+  align-items: center;
+  max-width: 760px;
+}
+
+.theme-larus .section-head .display { color: var(--brand-deep); }
+
+/*
+  Надзаголовок у темі синій, а на темній секції синє по темно-синьому не
+  читається. Там він світлий — як і решта тексту на цьому тлі.
+*/
+.theme-larus .section-navy .eyebrow { color: var(--on-dark-soft); }
+
+/* Тонка риска під заголовком — підпис WestAuto. У цій темі її немає */
+.theme-larus .rule::after { display: none; }
+
+.theme-larus #about .display { color: var(--brand-deep); }
+
+/* ─── Перший екран ─────────────────────────────────────────────────────── */
+
+/*
+  Темно-синє полотно з діагональним зрізом праворуч знизу.
+
+  Фотографії тут немає свідомо: у клієнта в цьому місці його власний знімок
+  вантажівки з контейнером, чужий кадр брати не можна. Настрій тримає градієнт
+  і геометрія — схоже за відчуттям і чесно щодо прав.
+*/
+.theme-larus .hero {
+  padding: clamp(56px, 7vw, 104px) var(--gutter) clamp(30px, 4vw, 48px);
+  background:
+    radial-gradient(900px 460px at 78% -20%, rgb(var(--brand-rgb) / 0.3), transparent 62%),
+    linear-gradient(135deg, var(--brand-raise) 0%, var(--brand-deep) 46%, var(--brand-darkest) 100%);
+  color: var(--on-dark);
+}
+
+/* Сам зріз: трикутник у правому нижньому куті */
+.theme-larus .hero::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 54%;
+  height: 74%;
+  background: linear-gradient(135deg, rgb(var(--brand-rgb) / 0.26), rgb(var(--accent-rgb) / 0.1));
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  pointer-events: none;
+}
+
+/* Вміст — над зрізом, інакше градієнт ляже поверх тексту */
+.theme-larus .hero-inner {
+  position: relative;
+  z-index: 1;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.theme-larus .hero-inner > .stack { max-width: 780px; }
+
+.theme-larus .hero h1 {
+  font-size: clamp(36px, 5.6vw, 64px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  /* Заголовок має лягти у два рядки сам, без <br>: примусовий перенос
+     в одній мові ламає дві інші */
+  max-width: 19ch;
+}
+
+.theme-larus .hero .lead {
+  color: var(--on-dark-soft);
+  max-width: 640px;
+}
+
+/* Бейдж-пілюля над заголовком */
+.theme-larus .hero-pill {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.08);
+  border: 1px solid rgb(255 255 255 / 0.18);
+  color: #fff;
+}
+
+/* Рядок-підказка з блискавкою */
+.theme-larus .hero-hint {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14.5px;
+  color: var(--on-dark-mid);
+}
+
+.theme-larus .hero-hint svg {
+  flex: none;
+  color: var(--accent);
+}
+
+.theme-larus .hero .btn-outline {
+  border-color: rgb(255 255 255 / 0.4);
+  color: #fff;
+  background: transparent;
+}
+
+.theme-larus .hero .btn-outline:hover {
+  border-color: #fff;
+  background: rgb(255 255 255 / 0.1);
+  color: #fff;
+}
+
+/* ─── Показники під першим екраном ─────────────────────────────────────── */
+
+/*
+  Ряд показників під тонкою розділювальною лінією. auto-fit, а не рівно
+  чотири колонки: профіль може дати три або п'ять, і жорстке число залишило б
+  порожню клітинку.
+*/
+.theme-larus .hero-figures {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: clamp(34px, 4.5vw, 58px) auto 0;
+  padding-top: clamp(22px, 3vw, 32px);
+  border-top: 1px solid rgb(255 255 255 / 0.14);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 24px;
+}
+
+.theme-larus .hero-figure-value {
+  font-family: var(--display);
+  font-size: clamp(26px, 3.2vw, 40px);
+  font-weight: 800;
+  line-height: 1.05;
+  color: #fff;
+}
+
+.theme-larus .hero-figure-label {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: var(--on-dark-soft);
+}
+
+/* ─── Картки послуг ────────────────────────────────────────────────────── */
+
+/*
+  Чотири в ряд, а не сітка auto-fit: шість карток у сітці дають рваний
+  останній ряд, притиснутий ліворуч. Гнучкий ряд із центруванням залишає
+  четвірку зверху і пару під нею посередині — так це виглядає задумано.
+*/
+.theme-larus .services {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+/*
+  Ширина задана часткою від ряду, а не «не менше 240 px»: з гнучкою основою
+  браузер сам вирішує, скільки карток помістити, і на широкому екрані клав
+  п'ять, залишаючи шосту самотньою посередині. Чверть ряду мінус проміжки
+  дає рівно чотири — скільки б карток не було.
+*/
+.theme-larus .service {
+  flex: 1 1 calc(25% - 15px);
+  max-width: calc(25% - 15px);
+  padding: 26px;
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-larus .service-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgb(var(--brand-rgb) / 0.08);
+  color: var(--brand);
+}
+
+.theme-larus .service h3 {
+  font-family: var(--display);
+  font-weight: 700;
+  color: var(--brand-deep);
+}
+
+/* ─── Етапи доставки: горизонтальний таймлайн ──────────────────────────── */
+
+/*
+  Головний прийом теми. Кружки з номерами з'єднані тонкою лінією, останній
+  крок — зелений із галочкою замість цифри: дорога закінчилася.
+
+  Лінію малює ::before кожного кроку на всю його ширину й на висоті центра
+  кружків; кружок стоїть над нею з білою заливкою, тому лінія ніби входить
+  у нього. У крайніх кроків половина лінії обрізана, щоб вона не висіла
+  за першим і останнім кружком.
+*/
+.theme-larus .timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+.theme-larus .tl-step {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.theme-larus .tl-step::before {
+  content: '';
+  position: absolute;
+  top: 23px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--line-strong);
+}
+
+.theme-larus .tl-step:first-child::before { left: 50%; }
+.theme-larus .tl-step:last-child::before { right: 50%; }
+
+.theme-larus .tl-dot {
+  position: relative;
+  z-index: 1;
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--brand);
+  background: var(--card);
+  color: var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.theme-larus .tl-step-done .tl-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.theme-larus .tl-step h3 {
+  font-family: var(--display);
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--brand-deep);
+}
+
+.theme-larus .tl-step p {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* ─── Переваги ─────────────────────────────────────────────────────────── */
+
+.theme-larus .advantages {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.theme-larus .advantage {
+  background: var(--cream);
+  border: 1px solid rgb(var(--ink-rgb) / 0.07);
+  border-radius: var(--radius);
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.theme-larus .advantage-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-larus .advantage h3 {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--brand-deep);
+}
+
+/* Остання в ряду — чорна картка з назвою бренду золотим і широкою кнопкою */
+.theme-larus .advantage-dark {
+  background: var(--brand-darkest);
+  border-color: var(--brand-darkest);
+  color: var(--on-dark-mid);
+}
+
+.theme-larus .advantage-dark h3 {
+  font-size: 20px;
+  color: var(--gold);
+}
+
+.theme-larus .advantage-dark p {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--on-dark-mid);
+}
+
+.theme-larus .advantage-dark .btn {
+  width: 100%;
+  margin-top: auto;
+}
+
+/* Шість коротких пунктів під картками — два ряди по три */
+.theme-larus .advantage-points {
+  list-style: none;
+  margin: clamp(24px, 3vw, 36px) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 28px;
+}
+
+.theme-larus .advantage-points li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.theme-larus .advantage-check {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: rgb(var(--accent-rgb) / 0.13);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Прайс ────────────────────────────────────────────────────────────── */
+
+.theme-larus .prices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+}
+
+.theme-larus .price {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-larus .price-caption {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.theme-larus .price-value {
+  font-family: var(--display);
+  font-size: clamp(32px, 3.6vw, 44px);
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--brand-deep);
+}
+
+.theme-larus .price-note {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* ─── Відгуки ──────────────────────────────────────────────────────────── */
+
+/* Велика лапка в куті — прийом WestAuto. Тут цитата стоїть у звичайних
+   лапках, а зверху картки — ряд зірок */
+.theme-larus .review::before { display: none; }
+
+.theme-larus .review p::before { content: '“'; }
+.theme-larus .review p::after { content: '”'; }
+
+.theme-larus .review-stars {
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: 3px;
+  color: var(--star);
+}
+
+.theme-larus .review-avatar {
+  background: rgb(var(--brand-rgb) / 0.1);
+  color: var(--brand);
+}
+
+/* ─── Адаптив теми ─────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  /*
+    Таймлайн стає вертикальним, а не ламається посередині: на вузькому екрані
+    шість кроків у ряд дають стовпчики по 50 px, у яких не стоїть жодне слово.
+
+    Кружок займає перший стовпчик і два рядки, заголовок і опис — другий.
+    Лінія теж повертається: тепер вона йде вниз від кружка до наступного.
+  */
+  .theme-larus .timeline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .theme-larus .tl-step {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    column-gap: 16px;
+    row-gap: 2px;
+    align-items: start;
+    text-align: left;
+    flex: none;
+    padding: 0 0 26px;
+  }
+
+  .theme-larus .tl-step > .tl-dot { grid-row: span 2; }
+
+  .theme-larus .tl-step::before {
+    top: 48px;
+    bottom: 0;
+    left: 23px;
+    right: auto;
+    width: 2px;
+    height: auto;
+  }
+
+  .theme-larus .tl-step:first-child::before { left: 23px; }
+
+  /* Від останнього кружка лінії вже нікуди не йти */
+  .theme-larus .tl-step:last-child::before { display: none; }
+  .theme-larus .tl-step:last-child { padding-bottom: 0; }
+}
+
+@media (max-width: 860px) {
+  /* Шість пунктів переваг в один стовпчик: у три на телефоні влазить
+     по одному слову в рядок */
+  .theme-larus .advantage-points { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Далі ряд рідшає рівними кроками: три, дві, одна — щоб останній ряд ніколи
+   не залишався з однією карткою посередині */
+@media (max-width: 1100px) {
+  .theme-larus .service {
+    flex-basis: calc(33.333% - 14px);
+    max-width: calc(33.333% - 14px);
+  }
+}
+
+@media (max-width: 860px) {
+  .theme-larus .service {
+    flex-basis: calc(50% - 10px);
+    max-width: calc(50% - 10px);
+  }
+}
+
+@media (max-width: 620px) {
+  .theme-larus .service {
+    flex-basis: 100%;
+    max-width: none;
+  }
+}

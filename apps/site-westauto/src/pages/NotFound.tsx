@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from '@/components/Icons';
+import { BRAND } from '@/content/brand';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useI18n } from '@/i18n';
 
@@ -12,7 +13,7 @@ import { useI18n } from '@/i18n';
  */
 export function NotFound() {
   const { t, href } = useI18n();
-  useDocumentTitle(`${t('notFound.title')} — WestAuto`);
+  useDocumentTitle(`${t('notFound.title')} — ${BRAND.name}`);
 
   return (
     <div className="empty-state">

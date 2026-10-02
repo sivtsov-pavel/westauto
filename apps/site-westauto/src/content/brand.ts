@@ -60,4 +60,15 @@ export const FONTS = profile.fonts;
 export const STEPS_FLOW = profile.steps;
 export const APP = profile.app;
 export const ARTICLE_SLUGS = profile.articles;
+
+/**
+ * Тема вёрстки экземпляра и блоки, которые есть только у неё.
+ *
+ * Отсутствующий блок — это «такой секции у этого клиента нет», а не «забыли
+ * заполнить»: вёрстка проверяет наличие и не рисует секцию вовсе.
+ */
+export const LAYOUT = profile.layout;
+export const HERO = profile.hero ?? null;
+export const ADVANTAGES = profile.advantages ?? null;
+export const PRICES = profile.prices ?? null;
 export const OVERRIDES = profile.overrides ?? {};
